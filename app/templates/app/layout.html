@@ -1,0 +1,154 @@
+{% load crispy_forms_tags %}
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - My Django Application</title>
+    {% load static %}
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - My Django Application</title>
+    {% load static %}
+    <link href="{% static 'app/mdb/css/mdb.min.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="{% static 'app/mdb/js/mdb.min.js' %}"></script>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'app/content/site.css' %}" />
+
+    <script src="{% static 'app/scripts/modernizr-2.6.2.js' %}"></script>
+    <script src="{% static 'app/scripts/vue.min.js' %}"></script>        
+    <script src="{% static 'app/scripts/axios.min.js' %}"></script>       
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
+
+<style>
+    :root {
+  --blue-primary: #0DBBDD;
+  --blue-primary-light: #8be8f5;
+  --blue-primary-dark: #0997b1;
+  
+  --blue-secondary: #007bff;
+  --blue-secondary-light: #6d9bf1;
+  --blue-secondary-dark: #0051a8;
+  
+  --blue-success: #28a745;
+  --blue-success-light: #7ae58f;
+  --blue-success-dark: #1e7e34;
+  
+  --blue-danger: #dc3545;
+  --blue-danger-light: #f1979e;
+  --blue-danger-dark: #c82333;
+  
+  --blue-warning: #ffc107;
+  --blue-warning-light: #ffd65e;
+  --blue-warning-dark: #b08800;
+  
+  --blue-info: #17a2b8;
+  --blue-info-light: #8cc7d8;
+  --blue-info-dark: #11707f;
+}
+
+/* Apply color theory */
+:root {
+  --blue-primary-complement: #ddbb0d;
+  --blue-primary-analogous-1: #0d82dd;
+  --blue-primary-analogous-2: #0dcbdd;
+  --blue-primary-triad-1: #dd0d73;
+  --blue-primary-triad-2: #3fdd0d;
+  --blue-primary-shade-1: #0d8d9a;
+  --blue-primary-shade-2: #0d739a;
+  --blue-primary-tint-1: #8dd6e0;
+  --blue-primary-tint-2: #b5e5ec;
+}
+</style>
+
+
+</head>
+
+
+
+
+<body style="padding-top: 0;">
+
+<div class="navbar navbar-expand-lg navbar-light bg-light" style="margin-left: 10px">
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+
+      <li class="nav-item active">
+        <a class="nav-link" href="{% url 'home' %}">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'about' %}">About</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'contact' %}">Contact </a>
+      </li>
+      <li class="nav-item">
+          {% if user.is_authenticated %}
+            <form id="logoutForm" action="/logout/" method="post" class="navbar-right">
+                {% csrf_token %}
+                <a style="" class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">Hello, {{ user.username }} click to log-out.</a>               
+
+            </form>
+          {% else %}
+          <a class="nav-link" href="{% url 'login' %}">Login </a>
+          {% endif %}
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+
+
+<div class="container">
+
+
+
+    {% block content %}
+    
+    {% endblock %}
+
+    
+        <footer>
+            <p>&copy; {{ year }} - My Django Application</p>
+        </footer>
+</div>
+
+
+    <script src="{% static 'app/scripts/bootstrap.js' %}"></script>
+    <script src="{% static 'app/scripts/respond.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+
+{% block scripts %}
+    
+    
+{% endblock %}
+
+</body>
+</html>
+

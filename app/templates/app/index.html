@@ -1,0 +1,183 @@
+{% extends "app/layout.html" %} {% block content %} <br>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title display-6" id="exampleModalLabel">Add Routine</h1>
+      </div>
+      <div class="modal-body">
+        <p class="lead">Select the current activities (click checkbox if done)</p>
+        <div id="chicken_routine">
+          <form class="form-horizontal"> {% csrf_token %} {{add_history|crispy}}
+            <button type="submit" @click="updateRoutine($('#id_chicken').val())" class="btn btn-warning" style="width:100%; display:inline-block;">Submit</button>
+          </form>
+        </div>
+        <script>
+          new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#chicken_routine",
+            mounted() {
+              alert("Mounted ang chicken routine form");
+            },
+            methods: {
+              updateRoutine(chickenId) {
+                const id_is_morning_bath = document.getElementById('id_is_morning_bath').value;
+                const id_is_afternoon_bath = document.getElementById('id_is_afternoon_bath').value;
+                const id_is_vitamin_a = document.getElementById('id_is_vitamin_a').value;
+                const id_is_vitamin_d = document.getElementById('id_is_vitamin_d').value;
+                const id_is_vitamin_e = document.getElementById('id_is_vitamin_e').value;
+                const id_is_vitamin_k = document.getElementById('id_is_vitamin_k').value;
+                const is_vitamin_b1 = document.getElementById('is_vitamin_b1').value;
+                const id_chicken = document.getElementById('id_chicken').value;
+
+               const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
+               axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+
+                const formData = new FormData();
+                formData.append('chicken', id_chicken);
+                formData.append('is_morning_bath', id_is_morning_bath);
+                formData.append('is_afternoon_bath', id_is_afternoon_bath);
+                formData.append('is_vitamin_a', id_is_vitamin_a);
+                formData.append('is_vitamin_d', id_is_vitamin_d);
+                formData.append('is_vitamin_e', id_is_vitamin_e);
+                formData.append('is_vitamin_k', id_is_vitamin_k);
+                formData.append('is_vitamin_b1', id_is_vitamin_b1);
+
+                axios.post("`/api/chicken-history/${chickenId}/", formData).then(response => {
+                  alert("Chicken added successfully!");
+                }).catch(error => {
+                  alert("Error adding chicken: " + error.message);
+                });
+              }
+            }
+          });
+        </script>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" style="width:100%; display:inline-block;" onclick="$('#exampleModal').modal('hide')" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function addRoutine() {
+    $('#exampleModal').modal('show');
+  }
+</script>
+<div id="app">
+  <h1 class="display-6">Add Chicken</h1>
+  <form enctype="multipart/form-data" class="form-horizontal"> {% csrf_token %} {{add_chicken|crispy}}
+    <button type="button" class="btn btn-success" @click="addChicken()">Add Chicken</button>
+  </form>
+</div>
+<script>
+  new Vue({
+    delimiters: ["[[", "]]"],
+    el: "#app",
+    mounted() {
+      alert("Mounted");
+    },
+    methods: {
+      addChicken() {
+        alert("Clicked");
+        const tag_number = document.getElementById('id_tag_number').value;
+        const fowl_pox_vaccine = document.getElementById('id_fowl_pox_vaccine').value;
+        const is_infected = document.getElementById('id_is_infected').value;
+        const birthdate = document.getElementById('id_birthdate').value;
+        const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
+        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+        const formData = new FormData();
+        formData.append('tag_number', tag_number);
+        formData.append('fowl_pox_vaccine', fowl_pox_vaccine);
+        formData.append('birthdate', birthdate);
+        formData.append('is_infected', is_infected);
+        axios.post("/api/chickens/", formData).then(response => {
+          alert("Chicken added successfully!");
+        }).catch(error => {
+          alert("Error adding chicken: " + error.message);
+        });
+      }
+    }
+  });
+</script>
+<br>
+<div id="chicken_table">
+  <h1 class="display-6">Lists of Chicken</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tag Number</th>
+        <th>Fowl Pox Vaccine</th>
+        <th>Birthdate</th>
+        <th>Is Infected</th>
+        <th>Picture</th>
+        <th>Delete</th>
+        <th>Add Routine</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="chicken in chickens" :key="chicken.id">
+        <td>[[ chicken.id ]]</td>
+        <td>[[ chicken.tag_number ]]</td>
+        <td>[[ chicken.fowl_pox_vaccine ]]</td>
+        <td>[[ chicken.birthdate ]]</td>
+        <td>[[ chicken.is_infected ]]</td>
+        <td>
+          <button class="btn btn-secondary">Add Picture for Chicken</button>
+        </td>
+        <td>
+          <button type="submit" class="btn btn-danger" @click="deleteChicken(chicken.id)">Delete Chicken</button>
+        </td>
+        <td>
+          <button type="submit" class="btn btn-warning" onclick="addRoutine()">Add Routine for Today</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<script>
+  function getCookie(name) {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
+  }
+  new Vue({
+    delimiters: ["[[", "]]"],
+    el: "#chicken_table",
+    data: {
+      chickens: [],
+    },
+    mounted() {
+      setInterval(this.fetchChickens, 10000);
+    },
+    methods: {
+      fetchChickens() {
+        axios.get("/api/chickens/").then(response => {
+          this.chickens = response.data;
+          console.log(this.chickens);
+        }).catch(error => {
+          console.error(error);
+        });
+      },
+      deleteChicken(chickenId) {
+        const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
+        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+        axios.delete(`/api/chickens/${chickenId}/`).then(response => {
+          console.log("Chicken deleted successfully!");
+          alert("Deleted");
+          // Handle any further actions after successful deletion
+        }).catch(error => {
+          console.error("Error deleting chicken:", error);
+          // Handle any errors that occur during deletion
+        });
+      },
+    }
+  });
+</script>
+<div class="row">
+  <div class="col-lg-12">
+    <h1 class="display-6">Chicken Dataset</h1>
+    <p class="lead">This is the basis and dataset of Random Forest Tree Regression</p>
+  </div>
+</div> {% endblock %}
