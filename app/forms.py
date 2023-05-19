@@ -50,9 +50,8 @@ class ChickenHistoryForm(forms.ModelForm):
     class Meta:
         model = ChickenHistory
         fields = ['is_morning_bath', 'is_afternoon_bath', 'is_vitamin_a', 'is_vitamin_d',
-                  'is_vitamin_e', 'is_vitamin_k', 'is_vitamin_b1', 'chicken']
+                  'is_vitamin_e', 'is_vitamin_k', 'is_vitamin_b1']
         labels = {
-            'chicken': 'Numero ng Manok',
             'is_morning_bath': 'Tapos na ba sa umagang pagligo?',
             'is_afternoon_bath': 'Tapos na ba hapon na pagligo?',
             'is_vitamin_a': 'Nakainom na ng Vitamin A?',

@@ -9,8 +9,20 @@ class ChickensSerializer(serializers.ModelSerializer):
 
 
 
-class ChickenHistorySerializer(serializers.ModelSerializer):
+class ChickenHistorySerializerJoined(serializers.ModelSerializer):
+
+    chicken_fowl_pox_vaccine = serializers.BooleanField(source='chicken.fowl_pox_vaccine')
+    chicken_verdict = serializers.CharField(source='chicken.verdict')
+    is_infected = serializers.CharField(source='chicken.is_infected')
+    tag_number = serializers.CharField(source='chicken.tag_number')
     class Meta:
         model = ChickenHistory
-        fields = ['id', 'chicken', 'is_morning_bath', 'is_afternoon_bath', 'is_vitamin_a',
-                  'is_vitamin_d', 'is_vitamin_e', 'is_vitamin_k', 'is_vitamin_b1', 'date']
+        fields = '__all__'
+
+
+class ChickenHistorySerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = ChickenHistory
+        fields = '__all__'

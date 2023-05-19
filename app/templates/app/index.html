@@ -1,4 +1,28 @@
 {% extends "app/layout.html" %} {% block content %} <br>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="verdict_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title display-6" id="exampleModalLabel">Verdict for the chicken</h1>
+      </div>
+      <div class="modal-body">
+
+            <p class="lead" id="verdict_message"></p>
+            <p class="lead" id="final_vote"></p>
+      
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" style="width:100%; display:inline-block;" onclick="$('#verdict_modal').modal('hide')" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -9,8 +33,14 @@
       <div class="modal-body">
         <p class="lead">Select the current activities (click checkbox if done)</p>
         <div id="chicken_routine">
-          <form class="form-horizontal"> {% csrf_token %} {{add_history|crispy}}
-            <button type="submit" @click="updateRoutine($('#id_chicken').val())" class="btn btn-warning" style="width:100%; display:inline-block;">Submit</button>
+          <form class="form-horizontal"> {% csrf_token %} 
+            
+            {{add_history|crispy}}
+
+<div id="div_id_chicken" class="mb-3"><label for="id_chicken" class="form-label requiredField">
+                Numero ng Manok<span class="asteriskField">*</span></label> <input type="text" name="chicken" required="required" id="id_chicken" class="form-control"/></div>
+
+            <button type="button" id="upd_btn" @click="updateRoutine($('#id_chicken').val())" class="btn btn-warning" style="width:100%; display:inline-block;">Submit</button>
           </form>
         </div>
         <script>
@@ -18,17 +48,18 @@
             delimiters: ["[[", "]]"],
             el: "#chicken_routine",
             mounted() {
-              alert("Mounted ang chicken routine form");
+              console.log("Mounted ang chicken routine form");
             },
             methods: {
               updateRoutine(chickenId) {
-                const id_is_morning_bath = document.getElementById('id_is_morning_bath').value;
-                const id_is_afternoon_bath = document.getElementById('id_is_afternoon_bath').value;
-                const id_is_vitamin_a = document.getElementById('id_is_vitamin_a').value;
-                const id_is_vitamin_d = document.getElementById('id_is_vitamin_d').value;
-                const id_is_vitamin_e = document.getElementById('id_is_vitamin_e').value;
-                const id_is_vitamin_k = document.getElementById('id_is_vitamin_k').value;
-                const is_vitamin_b1 = document.getElementById('is_vitamin_b1').value;
+                $('#upd_btn').attr("disabled", true);
+                const id_is_morning_bath = document.getElementById('id_is_morning_bath').checked;
+                const id_is_afternoon_bath = document.getElementById('id_is_afternoon_bath').checked;
+                const id_is_vitamin_a = document.getElementById('id_is_vitamin_a').checked;
+                const id_is_vitamin_d = document.getElementById('id_is_vitamin_d').checked;
+                const id_is_vitamin_e = document.getElementById('id_is_vitamin_e').checked;
+                const id_is_vitamin_k = document.getElementById('id_is_vitamin_k').checked;
+                const isb = document.getElementById('id_is_vitamin_b1').checked;
                 const id_chicken = document.getElementById('id_chicken').value;
 
                const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
@@ -42,10 +73,25 @@
                 formData.append('is_vitamin_d', id_is_vitamin_d);
                 formData.append('is_vitamin_e', id_is_vitamin_e);
                 formData.append('is_vitamin_k', id_is_vitamin_k);
-                formData.append('is_vitamin_b1', id_is_vitamin_b1);
 
-                axios.post("`/api/chicken-history/${chickenId}/", formData).then(response => {
-                  alert("Chicken added successfully!");
+                    formData.append('is_vitamin_b1', isb);
+                    event.preventDefault();
+
+                axios.post("{% url 'getprediction' %}", formData).then(response => {
+                    $('#exampleModal').modal('hide');
+
+                    const verdictMessageElement = document.getElementById('verdict_message');
+                    const finalVoteElement = document.getElementById('final_vote');
+
+                    // Set the innerHTML of the elements with the received response data
+                    verdictMessageElement.innerHTML = "Votes from 3 Trees: " + response.data.message;
+                    $('#upd_btn').attr("disabled", false);
+
+
+
+                    $('#verdict_modal').modal('show');
+
+            
                 }).catch(error => {
                   alert("Error adding chicken: " + error.message);
                 });
@@ -61,8 +107,10 @@
   </div>
 </div>
 <script>
-  function addRoutine() {
-    $('#exampleModal').modal('show');
+    function addRoutine(chickenId) {
+        document.getElementById('id_chicken').value = chickenId;
+      $('#exampleModal').modal('show');
+
   }
 </script>
 <div id="app">
@@ -76,14 +124,14 @@
     delimiters: ["[[", "]]"],
     el: "#app",
     mounted() {
-      alert("Mounted");
+      console.log("Mounted");
     },
     methods: {
       addChicken() {
-        alert("Clicked");
+        console.log("Clicked");
         const tag_number = document.getElementById('id_tag_number').value;
-        const fowl_pox_vaccine = document.getElementById('id_fowl_pox_vaccine').value;
-        const is_infected = document.getElementById('id_is_infected').value;
+        const fowl_pox_vaccine = document.getElementById('id_fowl_pox_vaccine').checked;
+        const is_infected = document.getElementById('id_is_infected').checked;
         const birthdate = document.getElementById('id_birthdate').value;
         const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
         axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
@@ -131,7 +179,7 @@
           <button type="submit" class="btn btn-danger" @click="deleteChicken(chicken.id)">Delete Chicken</button>
         </td>
         <td>
-          <button type="submit" class="btn btn-warning" onclick="addRoutine()">Add Routine for Today</button>
+          <button type="submit" id="routine_button" class="btn btn-warning" @click="showModal(chicken.id)">Add Routine for Today</button>
         </td>
       </tr>
     </tbody>
@@ -149,7 +197,7 @@
       chickens: [],
     },
     mounted() {
-      setInterval(this.fetchChickens, 10000);
+      setInterval(this.fetchChickens, 5000);
     },
     methods: {
       fetchChickens() {
@@ -171,13 +219,85 @@
           console.error("Error deleting chicken:", error);
           // Handle any errors that occur during deletion
         });
-      },
+        },
+
+        showModal(chickenId) {
+            addRoutine(chickenId);
+        },
+
     }
   });
 </script>
+
 <div class="row">
   <div class="col-lg-12">
     <h1 class="display-6">Chicken Dataset</h1>
     <p class="lead">This is the basis and dataset of Random Forest Tree Regression</p>
+
+    <div id="history">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Chicken Fowl Pox Vaccine</th>
+            <th>Chicken Verdict</th>
+            <th>Morning Bath</th>
+            <th>Afternoon Bath</th>
+            <th>Vitamin A</th>
+            <th>Vitamin D</th>
+            <th>Vitamin E</th>
+            <th>Vitamin K</th>
+            <th>Vitamin B1</th>
+            <th>Date of Routine</th>
+            <th>Is Infected?</th>
+            <th>Chicken Tag Number</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="chicken in chickenHistories" :key="chicken.id">
+            <td>[[ chicken.chicken_fowl_pox_vaccine ]]</td>
+            <td>[[ chicken.chicken_verdict ]]</td>
+            <td>[[ chicken.is_morning_bath ]]</td>
+            <td>[[ chicken.is_afternoon_bath ]]</td>
+            <td>[[ chicken.is_vitamin_a ]]</td>
+            <td>[[ chicken.is_vitamin_d ]]</td>
+            <td>[[ chicken.is_vitamin_e ]]</td>
+            <td>[[ chicken.is_vitamin_k ]]</td>
+            <td>[[ chicken.is_vitamin_b1 ]]</td>
+            <td>[[ chicken.date ]]</td>
+            <td>[[ chicken.is_infected ]]</td>
+              <td>[[ chicken.tag_number ]]</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+<script>
+  function getCookie(name) {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
+  }
+  new Vue({
+    delimiters: ["[[", "]]"],
+    el: "#history",
+    data: {
+      chickenHistories: [],
+    },
+    mounted() {
+      setInterval(this.fetchChickens, 5000);
+    },
+    methods: {
+      fetchChickens() {
+        axios.get("api/chicken-history/").then(response => {
+          this.chickenHistories = response.data;
+          console.log(this.chickenHistories);
+        }).catch(error => {
+          console.error(error);
+        });
+      }
+    }
+  });
+</script>
+
+
   </div>
 </div> {% endblock %}

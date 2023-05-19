@@ -29,7 +29,7 @@ class ChickenHistory(models.Model):
     is_vitamin_e = models.BooleanField(default=False)
     is_vitamin_k = models.BooleanField(default=False)
     is_vitamin_b1 = models.BooleanField(default=False)
-    date = models.DateField(default=models.DateField(auto_now=True))
+    date = models.DateField(default=models.DateField(auto_now=True), null = True)
 
 
     def __str__(self):

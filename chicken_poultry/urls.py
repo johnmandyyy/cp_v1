@@ -20,6 +20,7 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
+    path('getprediction', views.getPrediction, name='getprediction'),
     path('admin', admin.site.urls),
     path('api/chickens/', ChickensListCreateView.as_view(), name='chickens-list-create'),
     path('api/chickens/<int:id>/', ChickensRetrieveUpdateDestroyView.as_view(), name='chickens-retrieve-update-destroy'),
