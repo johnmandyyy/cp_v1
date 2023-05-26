@@ -1,7 +1,6 @@
 {% extends "app/layout.html" %} {% block content %} <br>
 
-
-
+{% if request.user.is_authenticated == True %}
 <!-- Modal -->
 <div class="modal fade" id="verdict_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -21,8 +20,6 @@
     </div>
   </div>
 </div>
-
-
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -38,7 +35,7 @@
             {{add_history|crispy}}
 
 <div id="div_id_chicken" class="mb-3"><label for="id_chicken" class="form-label requiredField">
-                Numero ng Manok<span class="asteriskField">*</span></label> <input type="text" name="chicken" required="required" id="id_chicken" class="form-control"/></div>
+                Numero ng Manok<span class="asteriskField">*</span></label> <input type="text" name="chicken" required="required" id="id_chicken" class="form-control" hidden/></div>
 
             <button type="button" id="upd_btn" @click="updateRoutine($('#id_chicken').val())" class="btn btn-warning" style="width:100%; display:inline-block;">Submit</button>
           </form>
@@ -197,7 +194,7 @@
       chickens: [],
     },
     mounted() {
-      setInterval(this.fetchChickens, 5000);
+      setInterval(this.fetchChickens, 1000);
     },
     methods: {
       fetchChickens() {
@@ -283,7 +280,7 @@
       chickenHistories: [],
     },
     mounted() {
-      setInterval(this.fetchChickens, 5000);
+      setInterval(this.fetchChickens, 1000);
     },
     methods: {
       fetchChickens() {
@@ -300,4 +297,19 @@
 
 
   </div>
-</div> {% endblock %}
+</div> 
+
+{% else %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="display-6">Log-In to Add Chickens</h1>
+        <p class="lead">You can add routine in the admin section.</p>
+    </div>
+</div>
+
+{% endif %}
+
+
+
+{% endblock %}

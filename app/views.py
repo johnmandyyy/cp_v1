@@ -1,13 +1,15 @@
 """
 Definition of views.
 """
-
+import numpy as np
 from datetime import datetime
 from django.shortcuts import render
 from django.http import HttpRequest
 from django.http import HttpResponse
 
 from .forms import *
+from sklearn.model_selection import train_test_split
+
 
 
 from rest_framework import generics
@@ -38,55 +40,32 @@ class Scripts(Thread):
 
 
     def startAlgorithm(self):
-        if self.getDataSet() != None:
-            vaccine, morning_bath, afternoon_bath, va, vd, ve, vk, b1, infected = self.getDataSet()
+        redo = 0
+        if type(self.getDataSet()) != type(None):
 
+                if redo == 1:
+                    pass
+                else:
+                    
+                    rs = self.getDataSet()
+                   
+                    rs_2 = rs
+                    rs.drop('id', axis=1, inplace=True)
+                    X = rs.drop(["is_infected"], axis=1).values
+                    new_x = np.array(X)
+                    print(new_x, "IS THE NEW")
+                    X = pd.DataFrame(new_x, columns = ['is_morning_bath','is_afternoon_bath','is_vitamin_a','is_vitamin_d','is_vitamin_e','is_vitamin_k','is_vitamin_b1', 'fowl_pax_vaccine'])
+                    y = rs_2.is_infected
+                    new_series = pd.Series(y)
+                    y = new_series   
+                    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2, random_state=2)
+                    tree_model = RandomForestRegressor(n_estimators=3)
+                    tree_model.fit(X_train, y_train)
+                    joblib.dump(tree_model, 'random_forest_model.joblib')
+                    print("Training of machine done.")
 
-            #ADD ENCODER TO MAKE SURE TREE WOULD WORK EVEN IF IT IS A STRING
-            encoder = LabelEncoder()
-
-            #FIT TO THE ENCODER
-            vaccine_encoded = encoder.fit_transform(vaccine)
-            morning_bath_encoded = encoder.fit_transform(morning_bath)
-            afternoon_bath_encoded = encoder.fit_transform(afternoon_bath)
-            va_encoded = encoder.fit_transform(va)
-            vd_encoded = encoder.fit_transform(vd)
-            ve_encoded = encoder.fit_transform(ve)
-            vk_encoded = encoder.fit_transform(vk)
-            vb1_encoded = encoder.fit_transform(b1)
-            infected_encoded = encoder.fit_transform(infected)
-
-            print("DONE ENCODING")
-
-            # CREATE PANDAS DATAFRAME
-            data = pd.DataFrame({
-                'vaccine': vaccine_encoded,
-                'morning_bath': morning_bath_encoded,
-                'afternoon_bath': afternoon_bath_encoded,
-                'va': va_encoded,
-                'vd': vd_encoded,
-                've': ve_encoded,
-                'vk': vk_encoded,
-                'b1': vb1_encoded,
-                'infected': infected_encoded
-            })
-
-            print(data)
-
-
-            # Create the random forest regressor
-            regressor = RandomForestRegressor(n_estimators=3)  # Set the number of trees to 3
-
-            # Split the data into independent and dependent variables
-            X = data[['vaccine', 'morning_bath', 'afternoon_bath', 'va', 'vd', 've', 'vk', 'b1']]
-            y = data['infected']
-
-            # Fit the regressor to the data
-            regressor.fit(X, y)
-
-            #SAVE MODEL
-            joblib.dump(regressor, 'random_forest_model.joblib')
-            print("Model was saved.")
+        else:
+            print("Insufficient Dataset")
 
 
     def getDataSet(self):
@@ -104,11 +83,14 @@ class Scripts(Thread):
         infected = []
 
         #GET THE DATASET
-        query = 'SELECT "app_chickenhistory"."id", "app_chickenhistory"."chicken_id", "app_chickenhistory"."is_morning_bath", "app_chickenhistory"."is_afternoon_bath", "app_chickenhistory"."is_vitamin_a", "app_chickenhistory"."is_vitamin_d", "app_chickenhistory"."is_vitamin_e", "app_chickenhistory"."is_vitamin_k", "app_chickenhistory"."is_vitamin_b1", "app_chickenhistory"."date", "app_chickens"."id", "app_chickens"."tag_number", "app_chickens"."fowl_pox_vaccine", "app_chickens"."birthdate", "app_chickens"."is_infected", "app_chickens"."picture", "app_chickens"."verdict" FROM "app_chickenhistory" INNER JOIN "app_chickens" ON ("app_chickenhistory"."chicken_id" = "app_chickens"."id")'
+        query = 'SELECT "app_chickenhistory".id, "app_chickenhistory"."is_morning_bath", "app_chickenhistory"."is_afternoon_bath", "app_chickenhistory"."is_vitamin_a", "app_chickenhistory"."is_vitamin_d", "app_chickenhistory"."is_vitamin_e", "app_chickenhistory"."is_vitamin_k", "app_chickenhistory"."is_vitamin_b1", "app_chickens"."fowl_pox_vaccine", "app_chickens"."is_infected" FROM "app_chickenhistory" INNER JOIN "app_chickens" ON ("app_chickenhistory"."chicken_id" = "app_chickens"."id")'
         try:
 
             #VALIDATE THE COUNT
-            if len(ChickenHistory.objects.raw(query)) > 0:
+            if len(ChickenHistory.objects.raw(query)) > 1:
+                rs = pd.read_sql(query, connection)
+               
+                return rs
 
                 #IF THERE IS A DATASET ADD THE DATA 
                 for each_rows in ChickenHistory.objects.raw(query):
@@ -128,16 +110,16 @@ class Scripts(Thread):
             else:
                 return None
         except Exception as e:
-            return None
             print(e)
+            return None
+            
 
 
 
     def run(self):
 
         while True:
-            print("Haha")
-            time.sleep(1)
+            time.sleep(5)
             self.startAlgorithm()
 
 Scripts()
@@ -187,33 +169,20 @@ def setCurrentValues(id):
         infected = []
 
         #GET THE DATASET
-        query = 'SELECT "app_chickenhistory"."id", "app_chickenhistory"."chicken_id", "app_chickenhistory"."is_morning_bath", "app_chickenhistory"."is_afternoon_bath", "app_chickenhistory"."is_vitamin_a", "app_chickenhistory"."is_vitamin_d", "app_chickenhistory"."is_vitamin_e", "app_chickenhistory"."is_vitamin_k", "app_chickenhistory"."is_vitamin_b1", "app_chickenhistory"."date", "app_chickens"."id", "app_chickens"."tag_number", "app_chickens"."fowl_pox_vaccine", "app_chickens"."birthdate", "app_chickens"."is_infected", "app_chickens"."picture", "app_chickens"."verdict" FROM "app_chickenhistory" INNER JOIN "app_chickens" ON ("app_chickenhistory"."chicken_id" = "app_chickens"."id") WHERE app_chickenhistory.id = ' + "'" + str(id) + "'"  
+        query = 'SELECT "app_chickenhistory"."id", "app_chickenhistory"."is_morning_bath", "app_chickenhistory"."is_afternoon_bath", "app_chickenhistory"."is_vitamin_a", "app_chickenhistory"."is_vitamin_d", "app_chickenhistory"."is_vitamin_e", "app_chickenhistory"."is_vitamin_k", "app_chickenhistory"."is_vitamin_b1", "app_chickens"."fowl_pox_vaccine" FROM "app_chickenhistory" INNER JOIN "app_chickens" ON ("app_chickenhistory"."chicken_id" = "app_chickens"."id") WHERE app_chickenhistory.id = ' + "'" + str(id) + "'"  
         print(query)
         try:
 
             #VALIDATE THE COUNT
             if len(ChickenHistory.objects.raw(query)) > 0:
-
-                #IF THERE IS A DATASET ADD THE DATA 
-                for each_rows in ChickenHistory.objects.raw(query):
-
-                    #ADDING EACH DATA TO THE LIST PER ROW
-                    vaccine.append(str(each_rows.fowl_pox_vaccine))
-                    morning_bath.append(str(each_rows.is_morning_bath))
-                    afternoon_bath.append(str(each_rows.is_afternoon_bath))
-                    va.append(str(each_rows.is_vitamin_a))
-                    vd.append(str(each_rows.is_vitamin_d))
-                    ve.append(str(each_rows.is_vitamin_e))
-                    vk.append(str(each_rows.is_vitamin_k))
-                    b1.append(str(each_rows.is_vitamin_b1))
-                    infected.append(str(each_rows.is_infected))
-
-                return vaccine, morning_bath, afternoon_bath, va, vd, ve, vk, b1, infected
-            else:
-                return None
+                rs = pd.read_sql(query, connection)
+                print(rs.dtypes)
+                rs = rs.drop(["id"], axis=1)
+                print(rs, "HAHA", type(rs))
+                return rs
         except Exception as e:
-            return None
             print(e)
+            return None
 
 
 def getPrediction(request):
@@ -248,73 +217,49 @@ def getPrediction(request):
             
             new_history_id = new_history.id
             print(new_history_id)
-            if setCurrentValues(new_history_id) != None:
-                
-                vaccine, morning_bath, afternoon_bath, va, vd, ve, vk, b1, infected = setCurrentValues(new_history_id)
-   
-                #ADD ENCODER TO MAKE SURE TREE WOULD WORK EVEN IF IT IS A STRING
-                encoder = LabelEncoder()
-
-                #FIT TO THE ENCODER
-                vaccine_encoded = encoder.fit_transform(vaccine)
-                morning_bath_encoded = encoder.fit_transform(morning_bath)
-                afternoon_bath_encoded = encoder.fit_transform(afternoon_bath)
-                va_encoded = encoder.fit_transform(va)
-                vd_encoded = encoder.fit_transform(vd)
-                ve_encoded = encoder.fit_transform(ve)
-                vk_encoded = encoder.fit_transform(vk)
-                vb1_encoded = encoder.fit_transform(b1)
-
-
-                data = pd.DataFrame({
-                    'vaccine': vaccine_encoded,
-                    'morning_bath': morning_bath_encoded,
-                    'afternoon_bath': afternoon_bath_encoded,
-                    'va': va_encoded,
-                    'vd': vd_encoded,
-                    've': ve_encoded,
-                    'vk': vk_encoded,
-                    'b1': vb1_encoded
-                })
-
+            if type(setCurrentValues(new_history_id)) != type(None):
+ 
+                data = setCurrentValues(new_history_id).values
                 loaded_regressor = joblib.load('random_forest_model.joblib')
                 # Use the loaded model for prediction
-                loaded_prediction = loaded_regressor.predict(data)
-                loaded_prediction_label = encoder.inverse_transform([int(loaded_prediction)])[0]
+                predictions_ = []
+                vrd = ""
+                for idx, tree in enumerate(loaded_regressor.estimators_):
+                    print(f"Votes from Tree {idx+1}:")
+                    print(tree.predict(data), type(tree.predict(data)), )
+                    if int(tree.predict(data)) == 1:
+                        vrd = vrd + "Sick" + ","
+                    else:
+                        vrd = vrd + "Not Sick" + ","
+        
 
-                # Make a prediction using the loaded regressor for each tree in the forest
-                loaded_predictions = []
-                for tree in loaded_regressor.estimators_:
-                    loaded_prediction = tree.predict(data)
-                    loaded_predictions.append(loaded_prediction)
+                # Print the final vote
+                final_vote = loaded_regressor.predict(data)
+                print("Final Vote:")
+                if final_vote[0] > 0.60:
+                    loaded_final_vote = "true"
+                else:
+                    loaded_final_vote = "false"
 
-                # Voting
-                loaded_votes = [encoder.inverse_transform([int(p)])[0] for p in loaded_predictions]
-                loaded_casted_votes = ", ".join(loaded_votes)
-                loaded_final_vote = max(set(loaded_votes), key=loaded_votes.count)
 
-                print("Predictions from each tree (loaded model):")
-                print(loaded_casted_votes)
-                print("Final Vote (loaded model):")
-                print(type(loaded_final_vote))
-
+                if getValue(str(loaded_final_vote)) == True:
+                    Chickens.objects.filter(id = int(request.POST.get('chicken'))).update(verdict = "Possibly Sick")
+                elif getValue(str(loaded_final_vote)) == False:
+                    Chickens.objects.filter(id = int(request.POST.get('chicken'))).update(verdict = "Not Sick")    
 
                 if str(loaded_final_vote).lower() == "false":
                     loaded_final_vote = "Chicken is not sick no isolation needed."
                 elif str(loaded_final_vote).lower() == "true":
                     loaded_final_vote = "Chicken is sick isolation is needed from other chickens."
 
-                if getValue(str(loaded_final_vote)) == True:
-                    Chickens.objects.filter(id = int(request.POST.get('chicken'))).update(verdict = "Possibly Sick")
-                elif getValue(str(loaded_final_vote)) == False:
-                    Chickens.objects.filter(id = int(request.POST.get('chicken'))).update(verdict = "Not Sick")    
                     
-                response_data = {'message':  "Votes from 3 trees: "+ str(loaded_casted_votes) + "<br>Final Vote:" + str(loaded_final_vote)}
+                response_data = {'message':  "Votes from 3 trees: "+ str(vrd) + "<br>Final Vote:" + str(loaded_final_vote)}
                 return JsonResponse(response_data)
     
         except Exception as e:
-            print(e)
-
+             response_data = {'message': e}
+             return JsonResponse(response_data)
+            
 
     else:
         response_data = {'message': 'Not a POST'}
