@@ -9,8 +9,8 @@ from django.contrib.auth.views import LoginView, LogoutView
 from app import forms, views
 
 
-from app.views import ChickensListCreateView, ChickensRetrieveUpdateDestroyView, ChickenHistoryListCreateView, ChickenHistoryRetrieveUpdateDestroyView
-
+from app.views import ChickensListCreateView, ChickensRetrieveUpdateDestroyView, ChickenHistoryListCreateView, ChickenHistoryRetrieveUpdateDestroyView, DiseaseListCreateView 
+from app.views import DiseaseRetrieveUpdateDestroyView, SymptomsListCreateView, SymptomsDestroyAll, SymptomsListCreateRandom
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -22,6 +22,11 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('getprediction', views.getPrediction, name='getprediction'),
     path('admin', admin.site.urls),
+    path('api/symptoms/create-random/', SymptomsListCreateRandom.as_view(), name='symptoms-random-create'),
+    path('api/symptoms/destroy-all/', SymptomsDestroyAll.as_view(), name='symptoms-destroy-all'),
+    path('api/symptoms/', SymptomsListCreateView.as_view(), name='symptoms-list-create'),
+    path('api/diseases/', DiseaseListCreateView.as_view(), name='diseases-list-create'),
+    path('api/diseases/<int:pk>/', DiseaseRetrieveUpdateDestroyView.as_view(), name='diseases-retrieve-update-destroy'),
     path('api/chickens/', ChickensListCreateView.as_view(), name='chickens-list-create'),
     path('api/chickens/<int:id>/', ChickensRetrieveUpdateDestroyView.as_view(), name='chickens-retrieve-update-destroy'),
     path('api/chicken-history/', ChickenHistoryListCreateView.as_view(), name='chicken-history-list-create'),

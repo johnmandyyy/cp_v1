@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Chickens
 from .models import ChickenHistory
+from .models import Disease
+from .models import Symptom
 
 class ChickensSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,8 +23,20 @@ class ChickenHistorySerializerJoined(serializers.ModelSerializer):
 
 
 class ChickenHistorySerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = ChickenHistory
+        fields = '__all__'
+
+
+
+class DiseaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Disease
+        fields = '__all__'
+
+
+class SymptomsSerializer(serializers.ModelSerializer):
+    disease_name = serializers.CharField(source='disease.name')
+    class Meta:
+        model = Symptom
         fields = '__all__'

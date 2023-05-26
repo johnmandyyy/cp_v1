@@ -29,14 +29,60 @@ import pandas as pd
 import joblib
 
 
+
+
+class DatasetGen:
+
+    def __init__(self):
+        pass
+
+
+    def randomGen(self):
+        from .models import Disease, Symptom
+        list_of_ids = []
+        for each_rows in Disease.objects.all():
+            list_of_ids.append(int(str(each_rows.id)))
+
+        list_of_ids.sort()
+
+        import random
+        disease = []
+
+        def random_bool():
+            return random.choice([True, False])
+
+        Symptom.objects.all().delete()
+   
+        i = 0
+        while i < 1095:
+
+            Symptom.objects.create(disease = Disease.objects.get(id = random.choice(list_of_ids)),
+                                   warts = random_bool(),
+                                   loss_of_appetite = random_bool(),
+                                   lesions = random_bool(),
+                                   blister = random_bool(),
+                                   swelling_eyes = random_bool(),
+                                   weight_loss = random_bool(),
+                                   reduced_water_consumption = random_bool(),
+                                   diarrhea = random_bool(),
+                                   less_egg_production = random_bool(),
+                                   difficulty_breathing = random_bool(),
+                                   pale_comb = random_bool(),
+                                   nasal_discharge = random_bool(),
+                                   watery_eyes = random_bool(),
+                                   paralysis = random_bool(),
+                                   watery_feces = random_bool(),
+                                   )
+
+            i = i + 1
+
+
 class Scripts(Thread):
 
     def __init__(self):
         Thread.__init__(self)
         self.daemon = True
         self.start() 
-
-
 
 
     def startAlgorithm(self):
@@ -51,17 +97,19 @@ class Scripts(Thread):
                    
                     rs_2 = rs
                     rs.drop('id', axis=1, inplace=True)
-                    X = rs.drop(["is_infected"], axis=1).values
+                    X = rs.drop(["disease_id"], axis=1).values
                     new_x = np.array(X)
-                    print(new_x, "IS THE NEW")
-                    X = pd.DataFrame(new_x, columns = ['is_morning_bath','is_afternoon_bath','is_vitamin_a','is_vitamin_d','is_vitamin_e','is_vitamin_k','is_vitamin_b1', 'fowl_pax_vaccine'])
-                    y = rs_2.is_infected
+
+                    X = pd.DataFrame(new_x, columns = ['warts','loss_of_appetite','lesions','blister','swelling_eyes','weight_loss','reduced_water_consumption', 'diarrhea', 'less_egg_production', 'difficulty_breathing', 'pale_comb', 'nasal_discharge', 'watery_eyes', 'paralysis', 'watery_feces'])
+                    y = rs_2.disease_id
                     new_series = pd.Series(y)
                     y = new_series   
                     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2, random_state=2)
                     tree_model = RandomForestRegressor(n_estimators=3)
                     tree_model.fit(X_train, y_train)
                     joblib.dump(tree_model, 'random_forest_model.joblib')
+
+                    print(X.columns, X.dtypes)
                     print("Training of machine done.")
 
         else:
@@ -69,44 +117,11 @@ class Scripts(Thread):
 
 
     def getDataSet(self):
-
-        #DEFINE INDEPDENT VARIABLES WHICH ARE THE ROUTINES
-        vaccine = []
-        morning_bath = []
-        afternoon_bath = []
-        va = []
-        vd = []
-        ve = []
-        vk = []
-        b1 = []
-        #DEFINE THE DEPENDENT VARIABLE WHICH IS THE PREDICTING OUTPUT
-        infected = []
-
-        #GET THE DATASET
-        query = 'SELECT "app_chickenhistory".id, "app_chickenhistory"."is_morning_bath", "app_chickenhistory"."is_afternoon_bath", "app_chickenhistory"."is_vitamin_a", "app_chickenhistory"."is_vitamin_d", "app_chickenhistory"."is_vitamin_e", "app_chickenhistory"."is_vitamin_k", "app_chickenhistory"."is_vitamin_b1", "app_chickens"."fowl_pox_vaccine", "app_chickens"."is_infected" FROM "app_chickenhistory" INNER JOIN "app_chickens" ON ("app_chickenhistory"."chicken_id" = "app_chickens"."id")'
+        query = 'SELECT * from app_symptom'
         try:
-
-            #VALIDATE THE COUNT
             if len(ChickenHistory.objects.raw(query)) > 1:
                 rs = pd.read_sql(query, connection)
-               
                 return rs
-
-                #IF THERE IS A DATASET ADD THE DATA 
-                for each_rows in ChickenHistory.objects.raw(query):
-
-                    #ADDING EACH DATA TO THE LIST PER ROW
-                    vaccine.append(str(each_rows.fowl_pox_vaccine))
-                    morning_bath.append(str(each_rows.is_morning_bath))
-                    afternoon_bath.append(str(each_rows.is_afternoon_bath))
-                    va.append(str(each_rows.is_vitamin_a))
-                    vd.append(str(each_rows.is_vitamin_d))
-                    ve.append(str(each_rows.is_vitamin_e))
-                    vk.append(str(each_rows.is_vitamin_k))
-                    b1.append(str(each_rows.is_vitamin_b1))
-                    infected.append(str(each_rows.is_infected))
-
-                return vaccine, morning_bath, afternoon_bath, va, vd, ve, vk, b1, infected
             else:
                 return None
         except Exception as e:
@@ -119,11 +134,63 @@ class Scripts(Thread):
     def run(self):
 
         while True:
-            time.sleep(5)
+            time.sleep(1)
             self.startAlgorithm()
-
+            #self.randomGen()
 Scripts()
 
+
+class SymptomsListCreateRandom(generics.ListCreateAPIView):
+    from .models import Symptom
+    from .serializers import SymptomsSerializer
+    queryset = Symptom.objects.all()
+    serializer_class = SymptomsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id']
+
+    def list(self, request, *args, **kwargs):
+        from rest_framework.response import Response
+        Symptom.objects.all().delete()
+        RandomData = DatasetGen()
+        RandomData.randomGen()
+        serializer = SymptomsSerializer(Symptom.objects.all(), many=True)
+        return Response(serializer.data)
+
+class SymptomsListCreateView(generics.ListCreateAPIView):
+    from .models import Symptom
+    from .serializers import SymptomsSerializer
+    queryset = Symptom.objects.all()
+    serializer_class = SymptomsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id']
+
+
+class SymptomsDestroyAll(generics.ListCreateAPIView):
+    from .models import Symptom
+    from .serializers import SymptomsSerializer
+    queryset = Symptom.objects.all()
+    serializer_class = SymptomsSerializer
+
+
+    def list(self, request, *args, **kwargs):
+        Symptom.objects.all().delete()
+        return super().list(request, *args, **kwargs)
+
+class DiseaseListCreateView(generics.ListCreateAPIView):
+    from .models import Disease
+    from .serializers import DiseaseSerializer
+    queryset = Disease.objects.all()
+    serializer_class = DiseaseSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id']
+
+class DiseaseRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    from .models import Disease
+    from .serializers import DiseaseSerializer
+    queryset = Disease.objects.all()
+    serializer_class = DiseaseSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id']
 
 
 class ChickensListCreateView(generics.ListCreateAPIView):
@@ -145,6 +212,7 @@ class ChickenHistoryListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return ChickenHistory.objects.all().select_related('chicken')
+
 
 class ChickenHistoryRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChickenHistory.objects.all()
@@ -195,64 +263,9 @@ def getPrediction(request):
             return False
 
     if request.method == 'POST':
-        
-        lst = None
+
         try:
-
-            from django.utils import timezone
-            if len(ChickenHistory.objects.filter(chicken = int(request.POST.get('chicken')), date = timezone.now())) > 0:
-                response_data = {'message': 'Chicken has an existing routine for today.'}
-                return JsonResponse(response_data)
-
-            new_history = ChickenHistory.objects.create(chicken = Chickens.objects.get(id=request.POST.get('chicken')),
-                                         is_morning_bath = getValue(str(request.POST.get('is_morning_bath').title())),
-                                         is_afternoon_bath = getValue(str(request.POST.get('is_afternoon_bath').title())),
-                                         is_vitamin_a = getValue(str(request.POST.get('is_vitamin_a').title())),
-                                         is_vitamin_d = getValue(str(request.POST.get('is_vitamin_d').title())),
-                                         is_vitamin_e = getValue(str(request.POST.get('is_vitamin_e').title())),
-                                         is_vitamin_k = getValue(str(request.POST.get('is_vitamin_k').title())),
-                                         is_vitamin_b1 = getValue(str(request.POST.get('is_vitamin_b1').title())),
-                                         date=timezone.now()
-                                          )
-            
-            new_history_id = new_history.id
-            print(new_history_id)
-            if type(setCurrentValues(new_history_id)) != type(None):
- 
-                data = setCurrentValues(new_history_id).values
-                loaded_regressor = joblib.load('random_forest_model.joblib')
-                # Use the loaded model for prediction
-                predictions_ = []
-                vrd = ""
-                for idx, tree in enumerate(loaded_regressor.estimators_):
-                    print(f"Votes from Tree {idx+1}:")
-                    print(tree.predict(data), type(tree.predict(data)), )
-                    if int(tree.predict(data)) == 1:
-                        vrd = vrd + "Sick" + ","
-                    else:
-                        vrd = vrd + "Not Sick" + ","
-        
-
-                # Print the final vote
-                final_vote = loaded_regressor.predict(data)
-                print("Final Vote:")
-                if final_vote[0] > 0.60:
-                    loaded_final_vote = "true"
-                else:
-                    loaded_final_vote = "false"
-
-
-                if getValue(str(loaded_final_vote)) == True:
-                    Chickens.objects.filter(id = int(request.POST.get('chicken'))).update(verdict = "Possibly Sick")
-                elif getValue(str(loaded_final_vote)) == False:
-                    Chickens.objects.filter(id = int(request.POST.get('chicken'))).update(verdict = "Not Sick")    
-
-                if str(loaded_final_vote).lower() == "false":
-                    loaded_final_vote = "Chicken is not sick no isolation needed."
-                elif str(loaded_final_vote).lower() == "true":
-                    loaded_final_vote = "Chicken is sick isolation is needed from other chickens."
-
-                    
+                pass
                 response_data = {'message':  "Votes from 3 trees: "+ str(vrd) + "<br>Final Vote:" + str(loaded_final_vote)}
                 return JsonResponse(response_data)
     
@@ -273,7 +286,7 @@ def getPrediction(request):
 
 def home(request):
     """Renders the home page."""
-
+    from .forms import PredictionSymptomsForm
 
     assert isinstance(request, HttpRequest)
     return render(
@@ -283,7 +296,7 @@ def home(request):
             'title':'Home Page',
             'year':datetime.now().year,
             'add_chicken': ChickensForm(),
-            'add_history': ChickenHistoryForm(),
+            'prediction_form' : PredictionSymptomsForm(),
         }
     )
 
@@ -301,12 +314,17 @@ def contact(request):
     )
 
 def about(request):
+    from .forms import DiseasesForm
+    from .forms import SymptomsForm
+
     """Renders the about page."""
     assert isinstance(request, HttpRequest)
     return render(
         request,
         'app/about.html',
         {
+            'symptoms_form' : SymptomsForm,
+            'disease_form': DiseasesForm,
             'title':'About',
             'message':'Your application description page.',
             'year':datetime.now().year,

@@ -1,10 +1,504 @@
 {% extends "app/layout.html" %}
 
 {% block content %}
-<br>
-<h2>{{ title }}.</h2>
-<h5>Chicken Poultry Virus Identification using Random Forest Tree</h5>
 
-<p class="lead"></p>
+<br>
+
+
+
+
+<!-- MODALS SECTION -->
+
+<script>
+
+    function editModal(message, contents) {
+        document.getElementById('reponse_modal_title').innerHTML = message;
+        document.getElementById('response_modal_content').innerHTML = contents;
+        $('#response_modal').modal('toggle');
+    }
+
+    function clearModal() {
+        document.getElementById('reponse_modal_title').innerHTML = "";
+        document.getElementById('response_modal_content').innerHTML = "";
+
+                        setInterval(function () {
+                            $('#response_modal').modal('hide');
+                        }, 2000);
+        
+    }
+
+</script>
+
+
+<div class="modal fade" id="generate_symptoms" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Generate Symptoms?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <p class="lead">This will generate a random symptoms, and the choices of diseases is based on the list of diseases.</p>
+      </div>
+
+      <div class="modal-body border-top">
+         
+          <div class="row">
+              <div class="col-lg-12">
+                  <button style="display:inline-block; width: 100%" @click="deleteAllData()"  class="btn btn-secondary">Delete All Symptoms</button>
+              </div>
+          </div>
+ <br>
+        <div class="row">
+            <div class="col-lg-6">
+                <button class="btn btn-success" id="generate_ok" @click="generateDataset()" style="width:100%; display:inline-block;">Confirm</button>
+            </div>
+            <div class="col-lg-6">
+                <button class="btn btn-danger" onclick="$('#generate_symptoms').modal('hide')" style="width:100%; display:inline-block;">Discard Changes</button>
+            </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+  new Vue({
+    el: "#generate_symptoms",
+    data: {
+      diseaseForm: {
+        name: ''
+      }
+    },
+    methods: {
+
+                      generateDataset() {
+                        var button = document.getElementById("generate_ok");
+                        button.disabled = true; // Disable the button
+
+
+                        axios.get("/api/symptoms/create-random/").then(response => {
+                        this.diseases = response.data;
+                        $('#generate_ok').disabled = true;
+                        $('#generate_symptoms').modal('hide');
+                        editModal("Notice: Generation", response.statusText);
+                        setInterval(function () {
+                            clearModal();
+                            button.disabled = false; // Disable the button
+                        }, 1000);
+
+                        }).catch(error => {
+                            console.error(error);
+                             button.disabled = false; // Disable the button
+                        });
+                      },
+
+
+                      deleteAllData() {
+                        
+                        axios.get("/api/symptoms/destroy-all/").then(response => {
+                        this.diseases = response.data;
+                        $('#generate_ok').disabled = true;
+                        $('#generate_symptoms').modal('hide');
+                        editModal("Notice: Deletion", response.statusText);
+                        setInterval(function () {
+                            clearModal();
+                        }, 1000);
+
+                        }).catch(error => {
+                          console.error(error);
+                        });
+                      },
+
+
+    }
+    //END OF METHOD
+  });
+</script>
+
+<div class="modal fade" id="response_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reponse_modal_title"></h5>
+      </div>
+      <div class="modal-body">
+        <p class="lead" id="response_modal_content"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="$('#response_modal').modal('hide')" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="disease_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Diseases</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form @submit.prevent="saveDisease">
+        {% csrf_token %}
+        <div class="modal-body">
+          {{ disease_form|crispy }}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  new Vue({
+    el: "#disease_modal",
+    data: {
+      diseaseForm: {
+        name: ''
+      }
+    },
+    methods: {
+      saveDisease() {
+        const name = document.getElementById('id_name').value;
+        const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
+        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+        const formData = new FormData();
+        formData.append('name', name);
+        axios.post("/api/diseases/", formData).then(response => {
+          document.getElementById('id_name').value = "";
+            $('#disease_modal').modal('hide');
+            console.log(response);
+            editModal("Notice", response.statusText);
+            setInterval(function () {
+                clearModal();
+            }, 1000);
+        }).catch(error => {
+          alert("Error adding chicken: " + error.message);
+        });
+      }
+    }
+    //END OF METHOD
+  });
+</script>
+
+
+<div class="modal fade" id="symptoms_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Symptoms</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {{symptoms_form|crispy}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="display-6">Random Forest Tree Regression</h1>
+                <p class="lead">Random forest regression is a supervised learning algorithm and bagging technique that uses an ensemble learning method for regression in machine learning. The trees in random forests run in parallel, meaning there is no interaction between these trees while building the trees.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+
+
+<div class="row">
+    <div class="col-lg-6">
+         <div class="card">
+             <div class="card-body">
+                    <h1 class="display-6">Manage</h1>
+                    <p class="lead">You can manage the diseases and append data to the dataset.</p>
+                    <div class="row">
+                        <div class="col-lg-6">
+                        <button style="display:inline-block; width: 100%;" class="btn btn-primary" onclick="$('#disease_modal').modal('show');">Add to List of Diseases</button>
+                        </div>
+
+                        <div class="col-lg-6">
+                        <button style="display:inline-block; width: 100%;" class="btn btn-secondary" onclick="$('#symptoms_modal').modal('show');">Add to Diseases</button>
+                        </div>
+
+                    </div>
+                 <br>
+                      <div class="row">
+
+                        <div class="col-lg-12">
+                        <button style="display:inline-block; width: 100%;" onclick="$('#generate_symptoms').modal('toggle')" class="btn btn-warning">Generate Random Symptoms / Delete All Symptoms</button>
+                        </div>
+                    </div>                 
+                    
+             </div>
+         </div>
+    </div>
+    <div class="col-lg-6">
+         <div class="card">
+             <div class="card-body">
+                    <h1 class="display-6">List of Diseases</h1>
+                 <p class="lead">List of diseases, this will be the predicting value based on independent variables.</p>
+                     <div class="table table-responsive" id="diseases_table" style="max-height: 200px; /* Set the maximum height for the scrollable area */
+    overflow-y: auto;">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Diseases Name</th>
+                            <th colspan="2">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="disease in diseases" :key="disease.id">
+                            <td>[[disease.name]]<input type="text" id="disease_id_name" class="form-control" :value="disease.name" disabled hidden/></td>
+                            <td><button class="btn btn-danger" @click="deleteDisease(disease.id)">Delete Disease</button></td>
+                            <td><button class="btn btn-success" @click="alert('Feature Soon')">Update Disease Name</button></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                 <script>
+                  function getCookie(name) {
+                    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                    return cookieValue ? cookieValue.pop() : '';
+                  }
+                  new Vue({
+                    delimiters: ["[[", "]]"],
+                    el: "#diseases_table",
+                    data: {
+                      diseases: [],
+                    },
+
+                   mounted() {
+
+                      setInterval(this.fetchChickens, 1000);
+
+
+                    },
+
+                      methods: {
+
+                      fetchChickens() {
+                        axios.get("/api/diseases/").then(response => {
+                          this.diseases = response.data;
+                          console.log(this.diseases);
+                        }).catch(error => {
+                          console.error(error);
+                        });
+                      },
+
+                      deleteDisease(id) {
+                        const csrftoken = getCookie('csrftoken');
+                        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+                        axios.delete(`/api/diseases/${id}/`).then(response => {
+                        editModal("Notice", "Deleted");
+                        setInterval(function () {
+                            clearModal();
+                        }, 1500);
+                        }).catch(error => {
+                          alert(error);
+                        });
+                        },
+
+                      updateDisease(id) {
+
+                       const csrftoken = getCookie('csrftoken');
+                       axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+
+                       const updatedData = {
+                       name: document.getElementById('disease_id_name').value
+                       }
+
+
+                        axios.put(`/api/diseases/${id}/`, updatedData).then(response => {
+                            alert(response);
+                        }).catch(error => {
+                          alert(error);
+                        });
+                        },
+
+                      }
+
+                  });
+                </script>
+
+             </div>
+         </div>
+    </div>
+</div>
+
+<br>
+
+<div class="row" id="dataset_section">
+    <div class="col-lg-12">
+         <div class="card bg-light">
+             <div class="card-body">
+                    
+                    <h1 class="display-6">Dataset</h1>
+                    <p class="lead">This will be the basis for predicting the disease of poultries.</p>
+                    
+
+                    <div class="table-responsive" style="max-height: 400px; /* Set the maximum height for the scrollable area */
+    overflow-y: auto;">
+                    <table class="table table-md table-light table-hover" id="table_symptoms_id">
+
+                        <thead>
+                             <tr>
+                            <th>Actions</th>
+                            <th>Disease</th>
+                            <th>Warts</th>
+                            <th>Loss of Appetite?</th>
+                            <th>Lesions</th>
+                            <th>Blister</th>
+                            <th>Swelling Eyes</th>
+                            <th>Weight Loss</th>
+                            <th>Reduced Water Consumption</th>
+                            <th>Diarrhea</th>
+                            <th>Less Egg Production</th>
+                            <th>Difficulty Breathing</th>
+                            <th>Pale Comb</th>
+                            <th>Nasal Discharge</th>
+                            <th>Watery Eyes</th>
+                            <th>Paralysis</th>
+                            <th>Watery Feces</th>
+                             </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr v-for="symptom in symptoms" :key="symptom.id">
+                                <td><button class="btn btn-danger">Delete Symptoms</button></td>
+                                 <td>[[ symptom.disease_name ]]</td>
+                                <td v-if="symptom.warts">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.loss_of_appetite">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.lesions">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.blister">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.swelling_eyes">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.weight_loss">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.reduced_water_consumption">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.diarrhea">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.less_egg_production">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.difficulty_breathing">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.pale_comb">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.nasal_discharge">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.watery_eyes">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.paralysis">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.watery_feces">Yes</td>
+                                <td v-else>No</td>
+                               
+                            </tr>
+                        </tbody>
+
+                    </table>
+                    </div>
+
+             </div>
+         </div>
+    </div>
+</div>
+
+
+                 <script>
+
+                    
+                  function getCookie(name) {
+                    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                    return cookieValue ? cookieValue.pop() : '';
+                  }
+                  new Vue({
+                    delimiters: ["[[", "]]"],
+                    el: "#dataset_section",
+                    data: {
+                      symptoms: [],
+                    },
+
+                   mounted() {
+
+                      setInterval(this.fetchData, 1000);
+                    },
+
+                      methods: {
+
+                      fetchData() {
+                        axios.get("/api/symptoms/").then(response => {
+                            this.symptoms = response.data;
+
+                                    setTimeout(() => {
+                                        $('#table_symptoms_id').DataTable();
+                                    }, 3000) //customize this
+
+                          console.log(this.diseases);
+                        }).catch(error => {
+                          console.error(error);
+                        });
+                      },
+
+                      deleteDisease(id) {
+                        const csrftoken = getCookie('csrftoken');
+                        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+                        axios.delete(`/api/diseases/${id}/`).then(response => {
+                            alert(response.data.status);
+                        }).catch(error => {
+                          alert(error);
+                        });
+                        },
+
+                      updateDisease(id) {
+
+                       const csrftoken = getCookie('csrftoken');
+                       axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+
+                       const updatedData = {
+                       name: document.getElementById('disease_id_name').value
+                       }
+
+
+                        axios.put(`/api/diseases/${id}/`, updatedData).then(response => {
+                            alert(response);
+                        }).catch(error => {
+                          alert(error);
+                        });
+                        },
+
+                      }
+
+                  });
+                </script>
+
+
 
 {% endblock %}
