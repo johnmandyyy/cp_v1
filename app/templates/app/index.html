@@ -2,9 +2,73 @@
 
 {% load static %}
 
-{% if request.user.is_authenticated == True %}
-<!-- Modal -->
 
+<!-- Modal -->
+                <div class="modal" id="image_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Picture of My Chicken</h5>
+                        
+                      </div>
+                        <form>
+                          <div class="modal-body">
+                              <img id="image_id" class="img-fluid" src="" />
+                          </div>
+                      <div class="modal-body border-top">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <button type="button" style="display:inline-block; width: 100%;" class="btn btn-secondary btn-rounded" onclick="$('#image_modal').modal('hide')">Close</button>
+                            </div>
+                        </div>
+                        
+                      </div>
+
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+
+<script>
+
+    function editModal(message, contents) {
+        document.getElementById('reponse_modal_title').innerHTML = message;
+        document.getElementById('response_modal_content').innerHTML = contents;
+        $('#response_modal').modal('toggle');
+    }
+
+    function clearModal() {
+        document.getElementById('reponse_modal_title').innerHTML = "";
+        document.getElementById('response_modal_content').innerHTML = "";
+
+                        setInterval(function () {
+                            $('#response_modal').modal('hide');
+                        }, 2000);
+        
+    }
+
+
+</script>
+
+
+<div class="modal fade" id="response_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reponse_modal_title"></h5>
+      </div>
+      <div class="modal-body">
+            <center>
+        <p class="lead" id="response_modal_content"></p>
+            </center>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-rounded" onclick="$('#response_modal').modal('hide')" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 <div class="modal fade" id="symptoms_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -12,26 +76,129 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Symptoms</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-rounded" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-
-          <form>
-              {{prediction_form|crispy}}
-           </form>
-
-      </div>
+        <form @submit.prevent="forecastDisease">
+          <div class="modal-body">
+           {{prediction_form|crispy}}
+          </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary btn-rounded" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary btn-rounded">Save changes</button>
       </div>
+
+      </form>
     </div>
   </div>
 </div>
 
 
+                <script>
+                      function getCookie(name) {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
+  }
 
 
+                  new Vue({
+                    delimiters: ["[[", "]]"],
+                    el: "#symptoms_modal",
+                    mounted() {
+                        console.log("Modal Mounted");
+                        
+                    },
+                      methods: {
+                          forecastDisease() {
+                              const is_infected = false;
+                              const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
+                              axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+
+                              const formData = new FormData();
+
+                              formData.append('warts', document.getElementById('id_warts').checked);
+                              formData.append('loss_of_appetite', document.getElementById('id_loss_of_appetite').checked);
+                              formData.append('lesions', document.getElementById('id_lesions').checked);
+                              formData.append('blister', document.getElementById('id_blister').checked);
+                              formData.append('swelling_eyes', document.getElementById('id_swelling_eyes').checked);
+                              formData.append('weight_loss', document.getElementById('id_weight_loss').checked);
+                              formData.append('reduced_water_consumption', document.getElementById('id_reducted_water_consumption').checked);
+                              formData.append('diarrhea', document.getElementById('id_diarrhea').checked);
+                              formData.append('less_egg_production', document.getElementById('id_less_egg_production').checked);
+                              formData.append('difficulty_breathing', document.getElementById('id_difficulty_breathing').checked);
+                              formData.append('pale_comb', document.getElementById('id_pale_comb').checked);
+                              formData.append('nasal_discharge', document.getElementById('id_nasal_discharge').checked);
+                              formData.append('watery_eyes', document.getElementById('id_watery_eyes').checked);
+                              formData.append('paralysis', document.getElementById('id_paralysis').checked);
+                              formData.append('watery_feces', document.getElementById('id_watery_feces').checked);
+
+
+                              axios.post("{% url 'getprediction' %}", formData).then(response => {
+                              $('#symptoms_modal').modal('hide');
+                               console.log(response.data.message);
+                           
+                              editModal("Notice: Forecasted Disease", response.data.message);
+                              $('#response_modal').modal('toggle');
+                                  
+
+                              }).catch(error => {
+                                  alert("Error adding chicken: " + error.message);
+                                });
+
+                },
+                      }
+
+                
+                  });
+                </script>
+
+
+
+{% if user.is_authenticated == False %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+        <div class="card-body">
+                        <h1 class="display-1">Poultry Diseases Forecasting System</h1>
+ <p class="lead">This system will benefit the agriculture industry to forecast the possible diseases emerging in poultry.</p>
+ <p class="lead">Do you want to diagnose your chicken? </p>
+  <p class="lead">Access our free diagnosis by clicking the button below.</p>
+<button class="btn btn-info btn-rounded" onclick="$('#symptoms_modal').modal('toggle')">Diagnose</button>
+            <button class="btn btn-secondary btn-rounded"><a class="nav-link" href="{% url 'about' %}">Read More</a></button>
+
+      
+        </div>
+        </div>
+
+    </div>
+</div>
+<br>
+{% endif %}
+
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <div class="card">
+            <div class="card-body">
+
+
+                <div class="image-container" style="">
+<img src="{% static 'app/img/bg.jpg' %}" alt="Sample Image" class="img-fluid" alt="Responsive image">
+
+</div>
+   
+            
+       
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<br>
+
+
+{% if user.is_authenticated %}
 
 <div class="row">
     <div class="col-lg-3">
@@ -40,9 +207,15 @@
                 <div id="app">
                   <h1 class="display-6">Add Chicken</h1>
                     <p class="lead">You can add chickens here by entering the required fields.</p>
-                  <form enctype="multipart/form-data" class="form-horizontal"> {% csrf_token %} {{add_chicken|crispy}}
-                    <button type="button" style="" class="btn btn-success" @click="addChicken()">Add Chicken</button>
-                  </form>
+                      <form enctype="multipart/form-data" class="form-horizontal"> {% csrf_token %} {{add_chicken|crispy}}
+                        <div class="row">
+                        <div class="col-lg-12">
+                        <button type="button" style="width: 100%; display:inline-block;" class="btn btn-success btn-rounded" data-mdb-ripple-color="dark" @click="addChicken()">Add Chicken</button>
+                        </div>
+
+                        </div>
+
+                      </form>
                 </div>
 
                 <script>
@@ -59,6 +232,7 @@
                         const fowl_pox_vaccine = document.getElementById('id_fowl_pox_vaccine').checked;
                         const is_infected = document.getElementById('id_is_infected').checked;
                         const birthdate = document.getElementById('id_birthdate').value;
+                        const picture = document.getElementById('id_picture').files[0];
                         const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
                         axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
                         const formData = new FormData();
@@ -66,6 +240,8 @@
                         formData.append('fowl_pox_vaccine', fowl_pox_vaccine);
                         formData.append('birthdate', birthdate);
                         formData.append('is_infected', is_infected);
+                        formData.append('picture', picture);
+
                         axios.post("/api/chickens/", formData).then(response => {
                           alert("Chicken added successfully!");
                         }).catch(error => {
@@ -79,15 +255,23 @@
         </div>
     </div>
 
+
+
+
     <div class="col-lg-9">
         <div class="card">
             <div class="card-body">
                 <div id="chicken_table">
+
+
+
                   <h1 class="display-6">Lists of Chicken</h1>
                     <p class="lead">This is the list of chickens.</p>
-                  <table class="table table-responsive table-sm">
+                    <div class="table table-responsive">
+                     <table class="table table-responsive table-sm">
                     <thead>
                       <tr>
+
                         <th>ID</th>
                         <th>Tag Number</th>
                         <th>Fowl Pox Vaccine</th>
@@ -100,23 +284,26 @@
                     </thead>
                     <tbody>
                       <tr v-for="chicken in chickens" :key="chicken.id">
+                      
                         <td>[[ chicken.id ]]</td>
                         <td>[[ chicken.tag_number ]]</td>
                         <td>[[ chicken.fowl_pox_vaccine ]]</td>
                         <td>[[ chicken.birthdate ]]</td>
                         <td>[[ chicken.is_infected ]]</td>
                         <td>
-                          <button class="btn btn-secondary">Add Picture for Chicken</button>
+                          <button class="btn btn-secondary btn-rounded" @click="setChickenImage(chicken.picture)">View Picture of Chicken</button>
                         </td>
                         <td>
-                          <button type="submit" class="btn btn-danger" @click="deleteChicken(chicken.id)">Remove chicken</button>
+                          <button type="submit" class="btn btn-danger btn-rounded" @click="deleteChicken(chicken.id)">Remove chicken</button>
                         </td>
                         <td>
-                          <button type="submit" id="routine_button" class="btn btn-warning" onclick="$('#symptoms_modal').modal('toggle')">Diagnose my chicken</button>
+                          <button type="submit" id="routine_button" class="btn btn-warning btn-rounded" onclick="$('#symptoms_modal').modal('toggle')">Diagnose my chicken</button>
                         </td>
                       </tr>
                     </tbody>
                   </table>
+                    </div>
+       
                 </div>
                 <script>
                   function getCookie(name) {
@@ -133,6 +320,12 @@
                       setInterval(this.fetchChickens, 1000);
                     },
                     methods: {
+                        setChickenImage(chickenInstance) {
+                            $('#image_modal').modal('show');
+                            const img = document.getElementById('image_id');
+                            img.src = "";
+                            img.src = chickenInstance;
+                        },
                       fetchChickens() {
                         axios.get("/api/chickens/").then(response => {
                           this.chickens = response.data;
@@ -164,11 +357,6 @@
     </div>
 
 </div>
-
-
-
-
-
 
 <div class="row" hidden>
   <div class="col-lg-12">
@@ -243,28 +431,12 @@
   </div>
 </div> 
 
-{% else %}
-
-     <h1 class="display-6">Poultry Diseases Forecasting System</h1>
- <p class="lead">This system will benefit the agriculture industry to forecast the possible diseases emerging in poultry.</p>
-
-<div class="row">
-    <div class="col-lg-12">
-
-        <div class="card">
-            <div class="card-body">
-   
-        <img src="{% static 'app/img/bg.jpg' %}" alt="Sample Image" class="img-fluid" alt="Responsive image">
-       
-
-            </div>
-        </div>
-
-    </div>
-</div>
-
-
 {% endif %}
+
+
+
+
+
 
 
 

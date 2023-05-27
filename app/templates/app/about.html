@@ -5,10 +5,6 @@
 <br>
 
 
-
-
-<!-- MODALS SECTION -->
-
 <script>
 
     function editModal(message, contents) {
@@ -30,6 +26,29 @@
 </script>
 
 
+<div class="modal fade" id="response_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reponse_modal_title"></h5>
+      </div>
+      <div class="modal-body">
+        <p class="lead" id="response_modal_content"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-rounded" onclick="$('#response_modal').modal('hide')" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- MODALS SECTION -->
+{% if user.is_authenticated %}
+
+
+
 <div class="modal fade" id="generate_symptoms" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -46,16 +65,16 @@
          
           <div class="row">
               <div class="col-lg-12">
-                  <button style="display:inline-block; width: 100%" @click="deleteAllData()"  class="btn btn-secondary">Delete All Symptoms</button>
+                  <button style="display:inline-block; width: 100%" @click="deleteAllData()"  class="btn btn-secondary btn-rounded">Delete All Symptoms</button>
               </div>
           </div>
  <br>
         <div class="row">
             <div class="col-lg-6">
-                <button class="btn btn-success" id="generate_ok" @click="generateDataset()" style="width:100%; display:inline-block;">Confirm</button>
+                <button class="btn btn-success btn-rounded" id="generate_ok" @click="generateDataset()" style="width:100%; display:inline-block;">Confirm</button>
             </div>
             <div class="col-lg-6">
-                <button class="btn btn-danger" onclick="$('#generate_symptoms').modal('hide')" style="width:100%; display:inline-block;">Discard Changes</button>
+                <button class="btn btn-danger btn-rounded" onclick="$('#generate_symptoms').modal('hide')" style="width:100%; display:inline-block;">Discard Changes</button>
             </div>
 
         </div>
@@ -121,21 +140,7 @@
   });
 </script>
 
-<div class="modal fade" id="response_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="reponse_modal_title"></h5>
-      </div>
-      <div class="modal-body">
-        <p class="lead" id="response_modal_content"></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="$('#response_modal').modal('hide')" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <div class="modal fade" id="disease_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -150,8 +155,8 @@
           {{ disease_form|crispy }}
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-secondary btn-rounded" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary btn-rounded">Save changes</button>
         </div>
       </form>
     </div>
@@ -170,12 +175,21 @@
     methods: {
       saveDisease() {
         const name = document.getElementById('id_name').value;
+
         const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
         axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
         const formData = new FormData();
+
         formData.append('name', name);
+        formData.append('description', document.getElementById('id_description').value);
+        formData.append('treatment', document.getElementById('id_treatment').value);
+
         axios.post("/api/diseases/", formData).then(response => {
-          document.getElementById('id_name').value = "";
+            document.getElementById('id_name').value = "";
+            document.getElementById('id_description').value = "";
+            document.getElementById('id_treatment').value = "";
+            
+            
             $('#disease_modal').modal('hide');
             console.log(response);
             editModal("Notice", response.statusText);
@@ -203,8 +217,8 @@
         {{symptoms_form|crispy}}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary btn-rounded" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary btn-rounded">Save changes</button>
       </div>
     </div>
   </div>
@@ -231,14 +245,14 @@
          <div class="card">
              <div class="card-body">
                     <h1 class="display-6">Manage</h1>
-                    <p class="lead">You can manage the diseases and append data to the dataset.</p>
+                    <p class="lead">Here you can manage the diseases and append new disease to the dataset. <br>You can select the symptoms that will be used as the basis for the tree.</p>
                     <div class="row">
                         <div class="col-lg-6">
-                        <button style="display:inline-block; width: 100%;" class="btn btn-primary" onclick="$('#disease_modal').modal('show');">Add to List of Diseases</button>
+                        <button style="display:inline-block; width: 100%;" class="btn btn-primary btn-rounded" onclick="$('#disease_modal').modal('show');">Add to List of Diseases</button>
                         </div>
 
                         <div class="col-lg-6">
-                        <button style="display:inline-block; width: 100%;" class="btn btn-secondary" onclick="$('#symptoms_modal').modal('show');">Add to Diseases</button>
+                        <button style="display:inline-block; width: 100%;" class="btn btn-secondary btn-rounded" onclick="$('#symptoms_modal').modal('show');">Add to Diseases</button>
                         </div>
 
                     </div>
@@ -246,7 +260,7 @@
                       <div class="row">
 
                         <div class="col-lg-12">
-                        <button style="display:inline-block; width: 100%;" onclick="$('#generate_symptoms').modal('toggle')" class="btn btn-warning">Generate Random Symptoms / Delete All Symptoms</button>
+                        <button style="display:inline-block; width: 100%;" onclick="$('#generate_symptoms').modal('toggle')" class="btn btn-warning btn-rounded">Generate Random Symptoms / Delete All Symptoms</button>
                         </div>
                     </div>                 
                     
@@ -270,8 +284,8 @@
                         <tbody>
                           <tr v-for="disease in diseases" :key="disease.id">
                             <td>[[disease.name]]<input type="text" id="disease_id_name" class="form-control" :value="disease.name" disabled hidden/></td>
-                            <td><button class="btn btn-danger" @click="deleteDisease(disease.id)">Delete Disease</button></td>
-                            <td><button class="btn btn-success" @click="alert('Feature Soon')">Update Disease Name</button></td>
+                            <td><button class="btn btn-danger btn-rounded" @click="deleteDisease(disease.id)">Delete Disease</button></td>
+                            <td><button class="btn btn-success btn-rounded" @click="alert('Feature Soon')">Update Disease Name</button></td>
                           </tr>
                         </tbody>
                       </table>
@@ -387,7 +401,7 @@
                         <tbody>
 
                             <tr v-for="symptom in symptoms" :key="symptom.id">
-                                <td><button class="btn btn-danger">Delete Symptoms</button></td>
+                                <td><button class="btn btn-danger btn-rounded">Delete Symptoms</button></td>
                                  <td>[[ symptom.disease_name ]]</td>
                                 <td v-if="symptom.warts">Yes</td>
                                 <td v-else>No</td>
@@ -432,7 +446,7 @@
 </div>
 
 
-                 <script>
+<script>
 
                     
                   function getCookie(name) {
@@ -498,6 +512,66 @@
 
                   });
                 </script>
+{% endif %}
+
+
+{% if user.is_authenticated == False %}
+  <h1 class="display-1">List of Diseases</h1>
+    <p class="lead">This are the diseases that can be diagnosed to our system, do you want to contribute to our dataset?</p>
+<br>
+
+<div class="row" id="list_for_free">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+               
+                <ul>
+                    <li v-for="disease in diseases" :key="disease.id">
+                        [[disease.name]] - [[disease.description]]<br><br><button @click="showTreatment(disease.treatment)" class="btn btn-info btn-rounded">View Treatments</button><br><br>
+                        
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getCookie(name) {
+        const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return cookieValue ? cookieValue.pop() : '';
+    }
+
+    new Vue({
+        delimiters: ["[[", "]]"],
+        el: "#list_for_free",
+        data: {
+            diseases: [],
+        },
+        mounted() {
+            setInterval(this.fetchDiseases, 1000);
+        },
+        methods: {
+            fetchDiseases() {
+                axios.get("/api/diseases/").then(response => {
+                    this.diseases = response.data;
+                }).catch(error => {
+                    console.error(error);
+                });
+            },
+
+
+            showTreatment(treatment) {
+                   
+                        editModal("Notice: Treatment",treatment);
+                          }
+        }
+    });
+</script>
+
+
+{% endif %}
+
 
 
 

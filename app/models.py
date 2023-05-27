@@ -14,7 +14,7 @@ class Chickens(models.Model):
     fowl_pox_vaccine = models.BooleanField(default=False)
     birthdate = models.DateField(default=models.DateField(auto_now_add=True))
     is_infected = models.BooleanField(default=False)
-    picture = models.ImageField(upload_to='media/chicken_pictures', null=True)
+    picture = models.ImageField(upload_to='chicken_pictures', null=True)
     verdict = models.CharField(max_length=255, default='No Verdict', null = False)
 
     def __str__(self):
@@ -38,6 +38,8 @@ class ChickenHistory(models.Model):
 
 class Disease(models.Model):
     name = models.CharField(max_length=100)
+    description = models.TextField(null = True, default = None)
+    treatment = models.TextField(null = True, default = None)
     def __str__(self):
         return self.name
 

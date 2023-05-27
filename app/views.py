@@ -254,6 +254,8 @@ def setCurrentValues(id):
 
 
 def getPrediction(request):
+    postedValues = []
+    
 
     from django.http import JsonResponse
     def getValue(val):
@@ -262,11 +264,57 @@ def getPrediction(request):
         elif val.lower() == "false":
             return False
 
-    if request.method == 'POST':
+
+
+
+
+
+    def getPredictedDisease(id):
+        from .models import Disease
 
         try:
-                pass
-                response_data = {'message':  "Votes from 3 trees: "+ str(vrd) + "<br>Final Vote:" + str(loaded_final_vote)}
+            for each in Disease.objects.filter(id = int(str(id))):
+                print(each)
+                return str(each.name)
+        except Exception as e:
+            return str(e)
+
+
+    def predictValues(inputs):
+        voted_predictions = ""
+
+        try:
+
+            loaded_regressor = joblib.load('random_forest_model.joblib')
+            inp = [inputs] #Independent variable
+            forecasted_ = loaded_regressor.predict(inp)[0]
+            final_val = int(round(float(forecasted_), 6))
+            fval = getPredictedDisease(final_val)
+
+            for tree in loaded_regressor.estimators_:
+                prediction = tree.predict(inp)[0]
+                predictions.append(getPredictedDisease(int(round(float(prediction), 6))))
+
+            for each_rows in predictions:
+                voted_predictions = voted_predictions  + str(each_rows) + "<br>"
+
+            #return "Votes from 3 Trees:" + "<br><br>" +  str(voted_predictions)[0:len(voted_predictions)] + "Final Verdict: <br>" + str(fval)
+            return "Final Verdict: <br>" + str(fval)
+        except Exception as e:
+            return str(e)
+
+
+    if request.method == 'POST':
+        predictions = []
+        try:
+                
+                for each_rows in request.POST:
+                    print(request.POST.get(str(each_rows)))
+                    postedValues.append(getValue(request.POST.get(str(each_rows))))
+
+                message = predictValues(postedValues)
+
+                response_data = {'message': message}
                 return JsonResponse(response_data)
     
         except Exception as e:

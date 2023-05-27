@@ -37,7 +37,25 @@
 
 
 
-<style>s
+<style>
+
+    .row {
+          -webkit-animation-name: fadeIn;
+  animation-name: fadeIn;
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+  }
+  @-webkit-keyframes fadeIn {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+  }
+  @keyframes fadeIn {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+    }
+
     :root {
   --blue-primary: #0DBBDD;
   --blue-primary-light: #8be8f5;
@@ -86,10 +104,10 @@
 
 <body style="padding-top: 0;">
 
-<div class="navbar navbar-expand-lg navbar-light bg-light" style="margin-left: 10px">
+<div class="navbar navbar-expand-lg navbar-light bg-light" >
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <span class="navbar-toggler-icon">&#8801;</span>
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
@@ -98,20 +116,28 @@
         <a class="nav-link" href="{% url 'home' %}">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'about' %}">Manage</a>
+        <a class="nav-link" href="{% url 'about' %}">{% if user.is_authenticated %}
+          Manage
+          {% else %}
+          About
+          {% endif %}
+          </a>
+
       </li>
+
+        {% if user.is_authenticated %}
       <li class="nav-item">
         <a class="nav-link" href="{% url 'contact' %}">Reports</a>
       </li>
+        {% endif %}
       <li class="nav-item">
           {% if user.is_authenticated %}
             <form id="logoutForm" action="/logout/" method="post" class="navbar-right">
                 {% csrf_token %}
                 <a style="" class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">Hello, {{ user.username }} click to log-out.</a>               
-
             </form>
           {% else %}
-          <a class="nav-link" href="{% url 'login' %}">Login </a>
+          <a class="nav-link" href="{% url 'login' %}">Log-in as administrator</a>
           {% endif %}
       </li>
     </ul>
@@ -131,7 +157,7 @@
 
     
         <footer>
-            <p>&copy; {{ year }} - Chicken Poultry Prediction System</p>
+            <p>&copy; {{ year }} Django Application</p>
         </footer>
 </div>
 

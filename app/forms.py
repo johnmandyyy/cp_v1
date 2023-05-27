@@ -42,12 +42,13 @@ class ChickensForm(forms.ModelForm):
             'fowl_pox_vaccine',
             'is_infected',
             'birthdate',
+            'picture',
             Submit('submit', 'Submit')
         )
 
     class Meta:
         model = Chickens
-        fields = ['tag_number', 'fowl_pox_vaccine', 'is_infected', 'birthdate']
+        fields = ['picture','tag_number', 'fowl_pox_vaccine', 'is_infected', 'birthdate']
 
 class ChickenHistoryForm(forms.ModelForm):
     class Meta:
@@ -70,8 +71,11 @@ class DiseasesForm(forms.ModelForm):
     class Meta:
         from .models import Disease
         model = Disease
-        fields = ['name']
-        labels = {'name': 'Name of Disease'}
+        fields = ['name', 'description', 'treatment']
+        labels = {
+            'name': 'Name of Disease', 'description': 'Description', 'treatment': 'Treatment'
+        }
+
         
 class SymptomsForm(forms.ModelForm):
 
@@ -98,21 +102,21 @@ class SymptomsForm(forms.ModelForm):
 
 
 class PredictionSymptomsForm(forms.ModelForm):
-    warts = forms.BooleanField(label='Warts')
-    loss_of_appetite = forms.BooleanField(label='Loss of Appetite')
-    lesions = forms.BooleanField(label='Lesions')
-    blister = forms.BooleanField(label='Blister')
-    swelling_eyes = forms.BooleanField(label='Swelling Eyes')
-    weight_loss = forms.BooleanField(label='Weight Loss')
-    reducted_water_consumption = forms.BooleanField(label='Reduced Water Consumption')
-    diarrhea = forms.BooleanField(label='Diarrhea')
-    less_egg_production = forms.BooleanField(label='Less Egg Production')
-    difficulty_breathing = forms.BooleanField(label='Difficulty Breathing')
-    pale_comb = forms.BooleanField(label='Pale Comb')
-    nasal_discharge = forms.BooleanField(label='Nasal Discharge')
-    watery_eyes = forms.BooleanField(label='Watery Eyes')
-    paralysis = forms.BooleanField(label='Paralysis')
-    watery_feces = forms.BooleanField(label='Watery Feces')
+    warts = forms.BooleanField(label='Warts', required=False)
+    loss_of_appetite = forms.BooleanField(label='Loss of Appetite', required=False)
+    lesions = forms.BooleanField(label='Lesions', required=False)
+    blister = forms.BooleanField(label='Blister', required=False)
+    swelling_eyes = forms.BooleanField(label='Swelling Eyes', required=False)
+    weight_loss = forms.BooleanField(label='Weight Loss', required=False)
+    reducted_water_consumption = forms.BooleanField(label='Reduced Water Consumption', required=False)
+    diarrhea = forms.BooleanField(label='Diarrhea', required=False)
+    less_egg_production = forms.BooleanField(label='Less Egg Production', required=False)
+    difficulty_breathing = forms.BooleanField(label='Difficulty Breathing', required=False)
+    pale_comb = forms.BooleanField(label='Pale Comb', required=False)
+    nasal_discharge = forms.BooleanField(label='Nasal Discharge', required=False)
+    watery_eyes = forms.BooleanField(label='Watery Eyes', required=False)
+    paralysis = forms.BooleanField(label='Paralysis', required=False)
+    watery_feces = forms.BooleanField(label='Watery Feces', required=False)
 
     class Meta:
         model = Predictions
