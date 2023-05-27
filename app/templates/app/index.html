@@ -1,232 +1,364 @@
 {% extends "app/layout.html" %} {% block content %} <br>
 
-{% if request.user.is_authenticated == True %}
+{% load static %}
+
+
 <!-- Modal -->
-<div class="modal fade" id="verdict_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title display-6" id="exampleModalLabel">Verdict for the chicken</h1>
-      </div>
-      <div class="modal-body">
+                <div class="modal" id="image_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Picture of My Chicken</h5>
+                        
+                      </div>
+                        <form>
+                          <div class="modal-body">
+                              <img id="image_id" class="img-fluid" src="" />
+                          </div>
+                      <div class="modal-body border-top">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <button type="button" style="display:inline-block; width: 100%;" class="btn btn-secondary btn-rounded" onclick="$('#image_modal').modal('hide')">Close</button>
+                            </div>
+                        </div>
+                        
+                      </div>
 
-            <p class="lead" id="verdict_message"></p>
-            <p class="lead" id="final_vote"></p>
-      
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" style="width:100%; display:inline-block;" onclick="$('#verdict_modal').modal('hide')" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title display-6" id="exampleModalLabel">Add Routine</h1>
-      </div>
-      <div class="modal-body">
-        <p class="lead">Select the current activities (click checkbox if done)</p>
-        <div id="chicken_routine">
-          <form class="form-horizontal"> {% csrf_token %} 
-            
-            {{add_history|crispy}}
-
-<div id="div_id_chicken" class="mb-3"><label for="id_chicken" class="form-label requiredField">
-                Numero ng Manok<span class="asteriskField">*</span></label> <input type="text" name="chicken" required="required" id="id_chicken" class="form-control" hidden/></div>
-
-            <button type="button" id="upd_btn" @click="updateRoutine($('#id_chicken').val())" class="btn btn-warning" style="width:100%; display:inline-block;">Submit</button>
-          </form>
-        </div>
-        <script>
-          new Vue({
-            delimiters: ["[[", "]]"],
-            el: "#chicken_routine",
-            mounted() {
-              console.log("Mounted ang chicken routine form");
-            },
-            methods: {
-              updateRoutine(chickenId) {
-                $('#upd_btn').attr("disabled", true);
-                const id_is_morning_bath = document.getElementById('id_is_morning_bath').checked;
-                const id_is_afternoon_bath = document.getElementById('id_is_afternoon_bath').checked;
-                const id_is_vitamin_a = document.getElementById('id_is_vitamin_a').checked;
-                const id_is_vitamin_d = document.getElementById('id_is_vitamin_d').checked;
-                const id_is_vitamin_e = document.getElementById('id_is_vitamin_e').checked;
-                const id_is_vitamin_k = document.getElementById('id_is_vitamin_k').checked;
-                const isb = document.getElementById('id_is_vitamin_b1').checked;
-                const id_chicken = document.getElementById('id_chicken').value;
-
-               const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
-               axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
-
-                const formData = new FormData();
-                formData.append('chicken', id_chicken);
-                formData.append('is_morning_bath', id_is_morning_bath);
-                formData.append('is_afternoon_bath', id_is_afternoon_bath);
-                formData.append('is_vitamin_a', id_is_vitamin_a);
-                formData.append('is_vitamin_d', id_is_vitamin_d);
-                formData.append('is_vitamin_e', id_is_vitamin_e);
-                formData.append('is_vitamin_k', id_is_vitamin_k);
-
-                    formData.append('is_vitamin_b1', isb);
-                    event.preventDefault();
-
-                axios.post("{% url 'getprediction' %}", formData).then(response => {
-                    $('#exampleModal').modal('hide');
-
-                    const verdictMessageElement = document.getElementById('verdict_message');
-                    const finalVoteElement = document.getElementById('final_vote');
-
-                    // Set the innerHTML of the elements with the received response data
-                    verdictMessageElement.innerHTML = "Votes from 3 Trees: " + response.data.message;
-                    $('#upd_btn').attr("disabled", false);
+                      </form>
+                    </div>
+                  </div>
+                </div>
 
 
-
-                    $('#verdict_modal').modal('show');
-
-            
-                }).catch(error => {
-                  alert("Error adding chicken: " + error.message);
-                });
-              }
-            }
-          });
-        </script>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" style="width:100%; display:inline-block;" onclick="$('#exampleModal').modal('hide')" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
 <script>
-    function addRoutine(chickenId) {
-        document.getElementById('id_chicken').value = chickenId;
-      $('#exampleModal').modal('show');
 
-  }
-</script>
-<div id="app">
-  <h1 class="display-6">Add Chicken</h1>
-  <form enctype="multipart/form-data" class="form-horizontal"> {% csrf_token %} {{add_chicken|crispy}}
-    <button type="button" class="btn btn-success" @click="addChicken()">Add Chicken</button>
-  </form>
-</div>
-<script>
-  new Vue({
-    delimiters: ["[[", "]]"],
-    el: "#app",
-    mounted() {
-      console.log("Mounted");
-    },
-    methods: {
-      addChicken() {
-        console.log("Clicked");
-        const tag_number = document.getElementById('id_tag_number').value;
-        const fowl_pox_vaccine = document.getElementById('id_fowl_pox_vaccine').checked;
-        const is_infected = document.getElementById('id_is_infected').checked;
-        const birthdate = document.getElementById('id_birthdate').value;
-        const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
-        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
-        const formData = new FormData();
-        formData.append('tag_number', tag_number);
-        formData.append('fowl_pox_vaccine', fowl_pox_vaccine);
-        formData.append('birthdate', birthdate);
-        formData.append('is_infected', is_infected);
-        axios.post("/api/chickens/", formData).then(response => {
-          alert("Chicken added successfully!");
-        }).catch(error => {
-          alert("Error adding chicken: " + error.message);
-        });
-      }
+    function editModal(message, contents) {
+        document.getElementById('reponse_modal_title').innerHTML = message;
+        document.getElementById('response_modal_content').innerHTML = contents;
+        $('#response_modal').modal('toggle');
     }
-  });
+
+    function clearModal() {
+        document.getElementById('reponse_modal_title').innerHTML = "";
+        document.getElementById('response_modal_content').innerHTML = "";
+
+                        setInterval(function () {
+                            $('#response_modal').modal('hide');
+                        }, 2000);
+        
+    }
+
+
 </script>
-<br>
-<div id="chicken_table">
-  <h1 class="display-6">Lists of Chicken</h1>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Tag Number</th>
-        <th>Fowl Pox Vaccine</th>
-        <th>Birthdate</th>
-        <th>Is Infected</th>
-        <th>Picture</th>
-        <th>Delete</th>
-        <th>Add Routine</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="chicken in chickens" :key="chicken.id">
-        <td>[[ chicken.id ]]</td>
-        <td>[[ chicken.tag_number ]]</td>
-        <td>[[ chicken.fowl_pox_vaccine ]]</td>
-        <td>[[ chicken.birthdate ]]</td>
-        <td>[[ chicken.is_infected ]]</td>
-        <td>
-          <button class="btn btn-secondary">Add Picture for Chicken</button>
-        </td>
-        <td>
-          <button type="submit" class="btn btn-danger" @click="deleteChicken(chicken.id)">Delete Chicken</button>
-        </td>
-        <td>
-          <button type="submit" id="routine_button" class="btn btn-warning" @click="showModal(chicken.id)">Add Routine for Today</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+
+
+<div class="modal fade" id="response_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reponse_modal_title"></h5>
+      </div>
+      <div class="modal-body">
+            <center>
+        <p class="lead" id="response_modal_content"></p>
+            </center>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-rounded" onclick="$('#response_modal').modal('hide')" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
-<script>
-  function getCookie(name) {
+
+
+<div class="modal fade" id="symptoms_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Symptoms</h5>
+        <button type="button" class="btn-close btn-rounded" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+        <form @submit.prevent="forecastDisease">
+          <div class="modal-body">
+           {{prediction_form|crispy}}
+          </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-rounded" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary btn-rounded">Save changes</button>
+      </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+
+                <script>
+                      function getCookie(name) {
     const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
     return cookieValue ? cookieValue.pop() : '';
   }
-  new Vue({
-    delimiters: ["[[", "]]"],
-    el: "#chicken_table",
-    data: {
-      chickens: [],
-    },
-    mounted() {
-      setInterval(this.fetchChickens, 1000);
-    },
-    methods: {
-      fetchChickens() {
-        axios.get("/api/chickens/").then(response => {
-          this.chickens = response.data;
-          console.log(this.chickens);
-        }).catch(error => {
-          console.error(error);
-        });
-      },
-      deleteChicken(chickenId) {
-        const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
-        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
-        axios.delete(`/api/chickens/${chickenId}/`).then(response => {
-          console.log("Chicken deleted successfully!");
-          alert("Deleted");
-          // Handle any further actions after successful deletion
-        }).catch(error => {
-          console.error("Error deleting chicken:", error);
-          // Handle any errors that occur during deletion
-        });
-        },
 
-        showModal(chickenId) {
-            addRoutine(chickenId);
-        },
 
-    }
-  });
-</script>
+                  new Vue({
+                    delimiters: ["[[", "]]"],
+                    el: "#symptoms_modal",
+                    mounted() {
+                        console.log("Modal Mounted");
+                        
+                    },
+                      methods: {
+                          forecastDisease() {
+                              const is_infected = false;
+                              const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
+                              axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+
+                              const formData = new FormData();
+
+                              formData.append('warts', document.getElementById('id_warts').checked);
+                              formData.append('loss_of_appetite', document.getElementById('id_loss_of_appetite').checked);
+                              formData.append('lesions', document.getElementById('id_lesions').checked);
+                              formData.append('blister', document.getElementById('id_blister').checked);
+                              formData.append('swelling_eyes', document.getElementById('id_swelling_eyes').checked);
+                              formData.append('weight_loss', document.getElementById('id_weight_loss').checked);
+                              formData.append('reduced_water_consumption', document.getElementById('id_reducted_water_consumption').checked);
+                              formData.append('diarrhea', document.getElementById('id_diarrhea').checked);
+                              formData.append('less_egg_production', document.getElementById('id_less_egg_production').checked);
+                              formData.append('difficulty_breathing', document.getElementById('id_difficulty_breathing').checked);
+                              formData.append('pale_comb', document.getElementById('id_pale_comb').checked);
+                              formData.append('nasal_discharge', document.getElementById('id_nasal_discharge').checked);
+                              formData.append('watery_eyes', document.getElementById('id_watery_eyes').checked);
+                              formData.append('paralysis', document.getElementById('id_paralysis').checked);
+                              formData.append('watery_feces', document.getElementById('id_watery_feces').checked);
+
+
+                              axios.post("{% url 'getprediction' %}", formData).then(response => {
+                              $('#symptoms_modal').modal('hide');
+                               console.log(response.data.message);
+                           
+                              editModal("Notice: Forecasted Disease", response.data.message);
+                              $('#response_modal').modal('toggle');
+                                  
+
+                              }).catch(error => {
+                                  alert("Error adding chicken: " + error.message);
+                                });
+
+                },
+                      }
+
+                
+                  });
+                </script>
+
+
+
+{% if user.is_authenticated == False %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+        <div class="card-body">
+                        <h1 class="display-1">Poultry Diseases Forecasting System</h1>
+ <p class="lead">This system will benefit the agriculture industry to forecast the possible diseases emerging in poultry.</p>
+ <p class="lead">Do you want to diagnose your chicken? </p>
+  <p class="lead">Access our free diagnosis by clicking the button below.</p>
+<button class="btn btn-info btn-rounded" onclick="$('#symptoms_modal').modal('toggle')">Diagnose</button>
+            <button class="btn btn-secondary btn-rounded"><a class="nav-link" href="{% url 'about' %}">Read More</a></button>
+
+      
+        </div>
+        </div>
+
+    </div>
+</div>
+<br>
+{% endif %}
+
 
 <div class="row">
+    <div class="col-lg-12">
+
+        <div class="card">
+            <div class="card-body">
+
+
+                <div class="image-container" style="">
+<img src="{% static 'app/img/bg.jpg' %}" alt="Sample Image" class="img-fluid" alt="Responsive image">
+
+</div>
+   
+            
+       
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<br>
+
+
+{% if user.is_authenticated %}
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="card">
+            <div class="card-body">
+                <div id="app">
+                  <h1 class="display-6">Add Chicken</h1>
+                    <p class="lead">You can add chickens here by entering the required fields.</p>
+                      <form enctype="multipart/form-data" class="form-horizontal"> {% csrf_token %} {{add_chicken|crispy}}
+                        <div class="row">
+                        <div class="col-lg-12">
+                        <button type="button" style="width: 100%; display:inline-block;" class="btn btn-success btn-rounded" data-mdb-ripple-color="dark" @click="addChicken()">Add Chicken</button>
+                        </div>
+
+                        </div>
+
+                      </form>
+                </div>
+
+                <script>
+                  new Vue({
+                    delimiters: ["[[", "]]"],
+                    el: "#app",
+                    mounted() {
+                      console.log("Mounted");
+                    },
+                    methods: {
+                      addChicken() {
+                        console.log("Clicked");
+                        const tag_number = document.getElementById('id_tag_number').value;
+                        const fowl_pox_vaccine = document.getElementById('id_fowl_pox_vaccine').checked;
+                        const is_infected = document.getElementById('id_is_infected').checked;
+                        const birthdate = document.getElementById('id_birthdate').value;
+                        const picture = document.getElementById('id_picture').files[0];
+                        const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
+                        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+                        const formData = new FormData();
+                        formData.append('tag_number', tag_number);
+                        formData.append('fowl_pox_vaccine', fowl_pox_vaccine);
+                        formData.append('birthdate', birthdate);
+                        formData.append('is_infected', is_infected);
+                        formData.append('picture', picture);
+
+                        axios.post("/api/chickens/", formData).then(response => {
+                          alert("Chicken added successfully!");
+                        }).catch(error => {
+                          alert("Error adding chicken: " + error.message);
+                        });
+                      }
+                    }
+                  });
+                </script>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-body">
+                <div id="chicken_table">
+
+
+
+                  <h1 class="display-6">Lists of Chicken</h1>
+                    <p class="lead">This is the list of chickens.</p>
+                    <div class="table table-responsive">
+                     <table class="table table-responsive table-sm">
+                    <thead>
+                      <tr>
+
+                        <th>ID</th>
+                        <th>Tag Number</th>
+                        <th>Fowl Pox Vaccine</th>
+                        <th>Birthdate</th>
+                        <th>Is Infected</th>
+                        <th>Picture</th>
+                        <th>Delete</th>
+                        <th>Diagnose Chicken</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="chicken in chickens" :key="chicken.id">
+                      
+                        <td>[[ chicken.id ]]</td>
+                        <td>[[ chicken.tag_number ]]</td>
+                        <td>[[ chicken.fowl_pox_vaccine ]]</td>
+                        <td>[[ chicken.birthdate ]]</td>
+                        <td>[[ chicken.is_infected ]]</td>
+                        <td>
+                          <button class="btn btn-secondary btn-rounded" @click="setChickenImage(chicken.picture)">View Picture of Chicken</button>
+                        </td>
+                        <td>
+                          <button type="submit" class="btn btn-danger btn-rounded" @click="deleteChicken(chicken.id)">Remove chicken</button>
+                        </td>
+                        <td>
+                          <button type="submit" id="routine_button" class="btn btn-warning btn-rounded" onclick="$('#symptoms_modal').modal('toggle')">Diagnose my chicken</button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                    </div>
+       
+                </div>
+                <script>
+                  function getCookie(name) {
+                    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                    return cookieValue ? cookieValue.pop() : '';
+                  }
+                  new Vue({
+                    delimiters: ["[[", "]]"],
+                    el: "#chicken_table",
+                    data: {
+                      chickens: [],
+                    },
+                    mounted() {
+                      setInterval(this.fetchChickens, 1000);
+                    },
+                    methods: {
+                        setChickenImage(chickenInstance) {
+                            $('#image_modal').modal('show');
+                            const img = document.getElementById('image_id');
+                            img.src = "";
+                            img.src = chickenInstance;
+                        },
+                      fetchChickens() {
+                        axios.get("/api/chickens/").then(response => {
+                          this.chickens = response.data;
+                          console.log(this.chickens);
+                        }).catch(error => {
+                          console.error(error);
+                        });
+                      },
+                      deleteChicken(chickenId) {
+                        const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
+                        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+                        axios.delete(`/api/chickens/${chickenId}/`).then(response => {
+                          console.log("Chicken deleted successfully!");
+                          alert("Deleted");
+                          // Handle any further actions after successful deletion
+                        }).catch(error => {
+                          console.error("Error deleting chicken:", error);
+                          // Handle any errors that occur during deletion
+                        });
+                        },
+
+
+                    }
+                  });
+                </script>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row" hidden>
   <div class="col-lg-12">
     <h1 class="display-6">Chicken Dataset</h1>
     <p class="lead">This is the basis and dataset of Random Forest Tree Regression</p>
@@ -299,16 +431,12 @@
   </div>
 </div> 
 
-{% else %}
-
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="display-6">Log-In to Add Chickens</h1>
-        <p class="lead">You can add routine in the admin section.</p>
-    </div>
-</div>
-
 {% endif %}
+
+
+
+
+
 
 
 
