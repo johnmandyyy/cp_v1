@@ -3,6 +3,7 @@ from .models import Chickens
 from .models import ChickenHistory
 from .models import Disease
 from .models import Symptom
+from .models import Analysis
 
 class ChickensSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,6 +38,15 @@ class DiseaseSerializer(serializers.ModelSerializer):
 
 class SymptomsSerializer(serializers.ModelSerializer):
     disease_name = serializers.CharField(source='disease.name')
+    forecasted_disease_id = serializers.CharField()
     class Meta:
         model = Symptom
+        fields = '__all__'
+
+
+
+class AnalysisSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Analysis
         fields = '__all__'

@@ -42,13 +42,12 @@ class ChickensForm(forms.ModelForm):
             'fowl_pox_vaccine',
             'is_infected',
             'birthdate',
-            'picture',
             Submit('submit', 'Submit')
         )
 
     class Meta:
         model = Chickens
-        fields = ['picture','tag_number', 'fowl_pox_vaccine', 'is_infected', 'birthdate']
+        fields = ['tag_number', 'fowl_pox_vaccine', 'is_infected', 'birthdate']
 
 class ChickenHistoryForm(forms.ModelForm):
     class Meta:

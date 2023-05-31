@@ -62,6 +62,10 @@ class Symptom(models.Model):
     paralysis = models.BooleanField(default=False)
     watery_feces = models.BooleanField(default=False)
 
+    belongs_to = models.CharField(max_length = 100, default = 'No Category')
+    forecasted_disease = models.ForeignKey(Disease, on_delete=models.CASCADE, null = True, related_name = 'forecasted_disease')
+    is_correct = models.BooleanField(null = True)
+
     def __str__(self):
         return f"Symptoms of {self.disease.name}"
 
@@ -87,3 +91,14 @@ class Predictions(models.Model):
 
     def __str__(self):
         return f"Symptoms of {self.disease.name}"
+
+
+class Analysis(models.Model):
+
+    total_dataset = models.IntegerField(default = 0, null = False)
+    validation_set = models.IntegerField(default = 0, null = False)
+    training_dataset = models.IntegerField(default = 0, null = False)
+    testing_dataset = models.IntegerField(default = 0, null = False)
+
+    validation_acc = models.FloatField(default = 0, null = False)
+    testing_acc = models.FloatField(default = 0, null = False)

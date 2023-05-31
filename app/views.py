@@ -37,6 +37,19 @@ class DatasetGen:
         pass
 
 
+    def predictInputs(self, inputs):
+        try:
+            loaded_regressor = joblib.load('random_forest_model.joblib')
+            inp = [inputs] #Independent variable
+            forecasted_ = loaded_regressor.predict(inp)[0]
+            final_val = int(round(float(forecasted_), 3))
+            return final_val
+        except Exception as e:
+            return str(e)
+        pass
+
+
+
     def randomGen(self):
         from .models import Disease, Symptom
         list_of_ids = []
@@ -96,31 +109,165 @@ class Scripts(Thread):
                     rs = self.getDataSet()
                    
                     rs_2 = rs
+
                     rs.drop('id', axis=1, inplace=True)
+
+                    rs.drop('belongs_to', axis=1, inplace=True)
+                    rs.drop('forecasted_disease_id', axis=1, inplace=True)
+                    rs.drop('is_correct', axis=1, inplace=True)
+
                     X = rs.drop(["disease_id"], axis=1).values
+                   
                     new_x = np.array(X)
 
                     X = pd.DataFrame(new_x, columns = ['warts','loss_of_appetite','lesions','blister','swelling_eyes','weight_loss','reduced_water_consumption', 'diarrhea', 'less_egg_production', 'difficulty_breathing', 'pale_comb', 'nasal_discharge', 'watery_eyes', 'paralysis', 'watery_feces'])
+                    print("\n\nConverting into pandas dataframe.")
                     y = rs_2.disease_id
                     new_series = pd.Series(y)
                     y = new_series   
                     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2, random_state=2)
                     tree_model = RandomForestRegressor(n_estimators=3)
+                    print("Fitting into Random Forest Tree")
                     tree_model.fit(X_train, y_train)
                     joblib.dump(tree_model, 'random_forest_model.joblib')
+                    print("Saving the model.")
+                    print("\n\n")
+                    for each_rows in X.columns:
+                        print(each_rows)
+                        time.sleep(0.5)
 
-                    print(X.columns, X.dtypes)
+                    print("Is the dependent variables.")
+                    print("Creating a Validation Set from 10% of the Trained Data")
+                    self.measureValidation()
+
+                    time.sleep(5)
+
+
                     print("Training of machine done.")
 
         else:
             print("Insufficient Dataset")
 
 
-    def getDataSet(self):
-        query = 'SELECT * from app_symptom'
+    def measureValidation(self):
+        Predictor = DatasetGen()
+
+        #GET VALIDATION SET
+
+        query = "SELECT * from app_symptom where belongs_to = 'Training Set' LIMIT (SELECT CAST(ROUND(COUNT(*) * 0.10) AS INTEGER) from app_symptom where belongs_to = 'Training Set');"
+        iteration = 0
+        count_true = 0
         try:
-            if len(ChickenHistory.objects.raw(query)) > 1:
-                rs = pd.read_sql(query, connection)
+            result = Symptom.objects.raw(query)
+            if len(result) > 0:
+                for e in result:
+
+
+                    inputs = [
+                        e.warts, e.loss_of_appetite,e.lesions,
+                              e.blister, e.swelling_eyes, e.weight_loss,
+                              e.reduced_water_consumption, e.diarrhea, e.less_egg_production,
+                              e.difficulty_breathing, e.pale_comb, e.nasal_discharge,
+                             e.watery_eyes, e.paralysis, e.watery_feces
+                        ]
+
+                    predicted_value = Predictor.predictInputs(inputs)
+                    remarks = None
+
+                    if int(predicted_value) == int(e.disease_id):
+                        remarks = True
+                        count_true = count_true + 1
+                    else:
+                        remarks = False
+
+
+                    Symptom.objects.filter(id = int(e.id)).update(belongs_to = 'Validation Set', forecasted_disease = int(predicted_value), is_correct = remarks)
+                    iteration = iteration + 1
+
+                #GET TESTING SET
+                iteration_testing = 0
+                count_testing = 0
+                for e in Symptom.objects.raw("SELECT * from app_symptom where belongs_to = 'Testing Set'"):
+
+
+                    inputs = [
+                        e.warts, e.loss_of_appetite,e.lesions,
+                              e.blister, e.swelling_eyes, e.weight_loss,
+                              e.reduced_water_consumption, e.diarrhea, e.less_egg_production,
+                              e.difficulty_breathing, e.pale_comb, e.nasal_discharge,
+                             e.watery_eyes, e.paralysis, e.watery_feces
+                        ]
+
+                    predicted_value = Predictor.predictInputs(inputs)
+                    remarks = None
+
+                    if int(predicted_value) == int(e.disease_id):
+                        remarks = True
+                        count_testing = count_testing + 1
+                    else:
+                        remarks = False
+
+
+                    Symptom.objects.filter(id = int(e.id)).update(belongs_to = 'Testing Set', forecasted_disease = int(predicted_value), is_correct = remarks)
+                    iteration_testing = iteration_testing + 1
+
+
+
+                from .models import Analysis
+                if len(Analysis.objects.all()) < 1:
+                    Analysis.objects.create(total_dataset = int(len(Symptom.objects.all())),
+                                            validation_set = int(len(Symptom.objects.all()) * 0.8) * 0.10,
+                                            training_dataset = int(len(Symptom.objects.all()) * 0.8),
+                                            testing_dataset =  int(len(Symptom.objects.all()) * 0.2),
+                                            validation_acc = (count_true / iteration) * 100,
+                                            testing_acc = (count_testing / iteration_testing) * 100
+                                            )
+                    print("DONE CREATING ANALYSIS REPORT")
+                else:
+                    print("DONE UPDATING ANALYSIS REPORT")
+                    Analysis.objects.all().update(total_dataset = int(len(Symptom.objects.all())),
+                                            validation_set = int(len(Symptom.objects.all()) * 0.8) * 0.10,
+                                            training_dataset = int(len(Symptom.objects.all()) * 0.8),
+                                            testing_dataset =  int(len(Symptom.objects.all()) * 0.2),
+                                            validation_acc = (count_true / iteration) * 100,
+                                            testing_acc = (count_testing / iteration_testing) * 100
+                                            )
+
+
+                print("Validation Accuracy: ", (count_true / iteration) * 100, "Testing Accuracy: ", (count_testing / iteration_testing) * 100)
+
+
+        except Exception as e:
+            print(e)
+
+
+    def measureTesting(self):
+        pass
+
+
+    #MODIFIED 70% 20% 10%
+    def getDataSet(self):
+
+        excluded_set = []
+
+        eighty_query = "SELECT * FROM app_symptom LIMIT (SELECT CAST(ROUND(COUNT(*) * 0.8) AS INTEGER) FROM app_symptom);"
+        twenty_query = "SELECT * from app_symptom WHERE id not in (SELECT ID FROM app_symptom LIMIT (SELECT CAST(ROUND(COUNT(*) * 0.8) AS INTEGER) FROM app_symptom))"
+        
+
+        try:
+            if len(ChickenHistory.objects.raw(eighty_query)) > 1:
+
+
+                for each_rows in ChickenHistory.objects.raw(eighty_query):
+                    Symptom.objects.filter(id = int(each_rows.id)).update(belongs_to = 'Training Set')
+                    excluded_set.append(int(each_rows.id))
+
+                for each_rows in ChickenHistory.objects.raw(twenty_query):
+                    Symptom.objects.filter(id = int(each_rows.id)).update(belongs_to = 'Testing Set')
+                    excluded_set.append(int(each_rows.id))
+
+
+                rs = pd.read_sql(eighty_query, connection)
                 return rs
             else:
                 return None
@@ -136,14 +283,55 @@ class Scripts(Thread):
         while True:
             time.sleep(1)
             self.startAlgorithm()
+            break
             #self.randomGen()
 Scripts()
+
+
+class TestingSetListCreate(generics.ListCreateAPIView):
+    from .models import Symptom
+    from .serializers import SymptomsSerializer
+    queryset = Symptom.objects.raw('SELECT "app_symptom"."id", "app_symptom"."disease_id", "app_symptom"."warts", "app_symptom"."loss_of_appetite", "app_symptom"."lesions", "app_symptom"."blister", "app_symptom"."swelling_eyes", "app_symptom"."weight_loss", "app_symptom"."reduced_water_consumption", "app_symptom"."diarrhea", "app_symptom"."less_egg_production", "app_symptom"."difficulty_breathing", "app_symptom"."pale_comb", "app_symptom"."nasal_discharge", "app_symptom"."watery_eyes", "app_symptom"."paralysis", "app_symptom"."watery_feces", "app_symptom"."belongs_to", (SELECT name from app_disease where app_disease.id = forecasted_disease_id) as forecasted_disease_id, "app_symptom"."is_correct", "app_disease"."id", "app_disease"."name", "app_disease"."description", "app_disease"."treatment" FROM "app_symptom" LEFT OUTER JOIN "app_disease" ON ("app_symptom"."forecasted_disease_id" = "app_disease"."id") where belongs_to = "Testing Set"')
+    serializer_class = SymptomsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id']
+
+    def list(self, request, *args, **kwargs):
+        from rest_framework.response import Response
+        serializer = SymptomsSerializer(self.queryset, many=True)
+        return Response(serializer.data)
+
+
+
+class ValidationSetListCreate(generics.ListCreateAPIView):
+    from .models import Symptom
+    from .serializers import SymptomsSerializer
+    queryset = Symptom.objects.raw('SELECT "app_symptom"."id", "app_symptom"."disease_id", "app_symptom"."warts", "app_symptom"."loss_of_appetite", "app_symptom"."lesions", "app_symptom"."blister", "app_symptom"."swelling_eyes", "app_symptom"."weight_loss", "app_symptom"."reduced_water_consumption", "app_symptom"."diarrhea", "app_symptom"."less_egg_production", "app_symptom"."difficulty_breathing", "app_symptom"."pale_comb", "app_symptom"."nasal_discharge", "app_symptom"."watery_eyes", "app_symptom"."paralysis", "app_symptom"."watery_feces", "app_symptom"."belongs_to", (SELECT name from app_disease where app_disease.id = forecasted_disease_id) as forecasted_disease_id, "app_symptom"."is_correct", "app_disease"."id", "app_disease"."name", "app_disease"."description", "app_disease"."treatment" FROM "app_symptom" LEFT OUTER JOIN "app_disease" ON ("app_symptom"."forecasted_disease_id" = "app_disease"."id") where belongs_to = "Validation Set"')
+    serializer_class = SymptomsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id']
+
+    def list(self, request, *args, **kwargs):
+        from rest_framework.response import Response
+        serializer = SymptomsSerializer(self.queryset, many=True)
+        return Response(serializer.data)
+
+
+class AnalaysisListCreate(generics.ListCreateAPIView):
+    from .models import Analysis
+    from .serializers import AnalysisSerializer
+    queryset = Analysis.objects.all()
+    serializer_class = AnalysisSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id']
 
 
 class SymptomsListCreateRandom(generics.ListCreateAPIView):
     from .models import Symptom
     from .serializers import SymptomsSerializer
     queryset = Symptom.objects.all()
+    print(queryset.query)
+
     serializer_class = SymptomsSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['id']
@@ -222,6 +410,9 @@ class ChickenHistoryRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIV
 
 
 
+
+
+
 def setCurrentValues(id):
 
         #DEFINE INDEPDENT VARIABLES WHICH ARE THE ROUTINES
@@ -238,13 +429,11 @@ def setCurrentValues(id):
 
         #GET THE DATASET
         query = 'SELECT "app_chickenhistory"."id", "app_chickenhistory"."is_morning_bath", "app_chickenhistory"."is_afternoon_bath", "app_chickenhistory"."is_vitamin_a", "app_chickenhistory"."is_vitamin_d", "app_chickenhistory"."is_vitamin_e", "app_chickenhistory"."is_vitamin_k", "app_chickenhistory"."is_vitamin_b1", "app_chickens"."fowl_pox_vaccine" FROM "app_chickenhistory" INNER JOIN "app_chickens" ON ("app_chickenhistory"."chicken_id" = "app_chickens"."id") WHERE app_chickenhistory.id = ' + "'" + str(id) + "'"  
-        print(query)
         try:
 
             #VALIDATE THE COUNT
             if len(ChickenHistory.objects.raw(query)) > 0:
                 rs = pd.read_sql(query, connection)
-                print(rs.dtypes)
                 rs = rs.drop(["id"], axis=1)
                 print(rs, "HAHA", type(rs))
                 return rs

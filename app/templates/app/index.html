@@ -232,7 +232,7 @@
                         const fowl_pox_vaccine = document.getElementById('id_fowl_pox_vaccine').checked;
                         const is_infected = document.getElementById('id_is_infected').checked;
                         const birthdate = document.getElementById('id_birthdate').value;
-                        const picture = document.getElementById('id_picture').files[0];
+                        //const picture = document.getElementById('id_picture').files[0];
                         const csrftoken = getCookie('csrftoken'); // Function to retrieve the CSRF token from the cookie
                         axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
                         const formData = new FormData();
@@ -240,7 +240,7 @@
                         formData.append('fowl_pox_vaccine', fowl_pox_vaccine);
                         formData.append('birthdate', birthdate);
                         formData.append('is_infected', is_infected);
-                        formData.append('picture', picture);
+                        //formData.append('picture', picture);
 
                         axios.post("/api/chickens/", formData).then(response => {
                           alert("Chicken added successfully!");
@@ -277,7 +277,6 @@
                         <th>Fowl Pox Vaccine</th>
                         <th>Birthdate</th>
                         <th>Is Infected</th>
-                        <th>Picture</th>
                         <th>Delete</th>
                         <th>Diagnose Chicken</th>
                       </tr>
@@ -290,9 +289,7 @@
                         <td>[[ chicken.fowl_pox_vaccine ]]</td>
                         <td>[[ chicken.birthdate ]]</td>
                         <td>[[ chicken.is_infected ]]</td>
-                        <td>
-                          <button class="btn btn-secondary btn-rounded" @click="setChickenImage(chicken.picture)">View Picture of Chicken</button>
-                        </td>
+
                         <td>
                           <button type="submit" class="btn btn-danger btn-rounded" @click="deleteChicken(chicken.id)">Remove chicken</button>
                         </td>
