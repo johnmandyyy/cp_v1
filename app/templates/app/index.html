@@ -75,15 +75,15 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add Symptoms</h5>
-        <button type="button" class="btn-close btn-rounded" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="exampleModalLabel">Forecast Symptoms</h5>
+        <button type="button" class="btn-close btn-rounded" data-bs-dismiss="modal" onclick="$('#symptoms_modal').modal('hide')" aria-label="Close"></button>
       </div>
         <form @submit.prevent="forecastDisease">
           <div class="modal-body">
            {{prediction_form|crispy}}
           </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-rounded" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary btn-rounded" data-bs-dismiss="modal" onclick="$('#symptoms_modal').modal('hide')">Close</button>
         <button type="submit" class="btn btn-primary btn-rounded">Save changes</button>
       </div>
 

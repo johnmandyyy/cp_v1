@@ -213,16 +213,90 @@
         <h5 class="modal-title" id="exampleModalLabel">Add Symptoms</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <form>
       <div class="modal-body">
         {{symptoms_form|crispy}}
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary btn-rounded" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary btn-rounded">Save changes</button>
+        <button type="button" @click="addDisease()" class="btn btn-primary btn-rounded">Save changes</button>
       </div>
+      </form>
     </div>
   </div>
 </div>
+
+<script>
+  function getCookie(name) {
+      const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+      return cookieValue ? cookieValue.pop() : '';
+  }
+
+  new Vue({
+      delimiters: ["[[", "]]"],
+      el: "#symptoms_modal",
+      data: {
+        disease : false,
+        warts : false,
+        loss_of_appetite : false,
+        lesions : false,
+        blister : false,
+        swelling_eyes : false,
+        weight_loss : false,
+        reduced_water_consumption : false,
+        diarrhea : null,
+        less_egg_production : false,
+        difficulty_breathing : false,
+        pale_comb : false,
+        nasal_discharge : false,
+        watery_eyes : false,
+        paralysis : false,
+        watery_feces : false,
+        diarrhea: false,
+      },
+      mounted() {
+        console.log('test')
+      },
+      methods: {
+        
+        async addDisease() {
+          event.preventDefault();
+
+          var fData = new FormData();
+          fData = {
+          "disease": this.disease,
+          "warts": this.warts,
+          "loss_of_appetite": this.loss_of_appetite,
+          "lesions": this.lesions,
+          "blister": this.blister,
+          "swelling_eyes": this.swelling_eyes,
+          "weight_loss": this.weight_loss,
+          "reduced_water_consumption": this.reduced_water_consumption,
+          "diarrhea": this.diarrhea,
+          "less_egg_production": this.less_egg_production,
+          "difficulty_breathing": this.difficulty_breathing,
+          "pale_comb": this.pale_comb,
+          "nasal_discharge": this.nasal_discharge,
+          "watery_eyes": this.watery_eyes,
+          "paralysis": this.paralysis,
+          "watery_feces": this.watery_eyes,
+          "belongs_to": "No Category",
+          "is_correct": false,
+          "forecasted_disease": null
+          }
+
+          console.log(fData)
+
+          const csrftoken = getCookie('csrftoken');
+          axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+
+          const response = await axios.post("/api/create-symptoms/", fData);
+          console.log(response)
+
+        }
+      }
+  });
+</script>
 
 
 
@@ -304,8 +378,8 @@
                     },
 
                    mounted() {
-
-                      setInterval(this.fetchChickens, 1000);
+                    this.fetchChickens();
+                      //setInterval(this.fetchChickens, 1000);
 
 
                     },
@@ -461,8 +535,8 @@
                     },
 
                    mounted() {
-
-                      setInterval(this.fetchData, 1000);
+                    this.fetchData();
+                      //setInterval(this.fetchData, 1000);
                     },
 
                       methods: {

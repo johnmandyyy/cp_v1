@@ -78,26 +78,21 @@ class DiseasesForm(forms.ModelForm):
         
 class SymptomsForm(forms.ModelForm):
 
-    disease = forms.ModelChoiceField(label='Disease', queryset=Disease.objects.all())
-    warts = forms.BooleanField(label='Warts')
-    loss_of_appetite = forms.BooleanField(label='Loss of Appetite')
-    lesions = forms.BooleanField(label='Lesions')
-    blister = forms.BooleanField(label='Blister')
-    swelling_eyes = forms.BooleanField(label='Swelling Eyes')
-    weight_loss = forms.BooleanField(label='Weight Loss')
-    reducted_water_consumption = forms.BooleanField(label='Reduced Water Consumption')
-    diarrhea = forms.BooleanField(label='Diarrhea')
-    less_egg_production = forms.BooleanField(label='Less Egg Production')
-    difficulty_breathing = forms.BooleanField(label='Difficulty Breathing')
-    pale_comb = forms.BooleanField(label='Pale Comb')
-    nasal_discharge = forms.BooleanField(label='Nasal Discharge')
-    watery_eyes = forms.BooleanField(label='Watery Eyes')
-    paralysis = forms.BooleanField(label='Paralysis')
-    watery_feces = forms.BooleanField(label='Watery Feces')
-
+    
     class Meta:
         model = Symptom
-        fields = ['disease', 'warts', 'loss_of_appetite', 'lesions', 'blister', 'swelling_eyes', 'weight_loss', 'reducted_water_consumption', 'diarrhea', 'less_egg_production', 'difficulty_breathing', 'pale_comb', 'nasal_discharge', 'watery_eyes', 'paralysis', 'watery_feces']
+        fields = ['disease', 'warts', 'loss_of_appetite', 'lesions', 'blister', 'swelling_eyes', 'weight_loss', 'reduced_water_consumption', 'diarrhea', 'less_egg_production', 'difficulty_breathing', 'pale_comb', 'nasal_discharge', 'watery_eyes', 'paralysis', 'watery_feces']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # List of field names for which you want to set v-model
+        fields = ['disease', 'warts', 'loss_of_appetite', 'lesions', 'blister', 'swelling_eyes', 'weight_loss', 'reduced_water_consumption', 'diarrhea', 'less_egg_production', 'difficulty_breathing', 'pale_comb', 'nasal_discharge', 'watery_eyes', 'paralysis', 'watery_feces']
+        
+        # Loop through the fields and set the v-model attribute
+        for field_name in fields:
+            self.fields[field_name].widget.attrs["v-model"] = field_name
+
 
 
 class PredictionSymptomsForm(forms.ModelForm):

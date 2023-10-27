@@ -10,7 +10,7 @@ from app import forms, views
 
 
 from app.views import ChickensListCreateView, ChickensRetrieveUpdateDestroyView, ChickenHistoryListCreateView, ChickenHistoryRetrieveUpdateDestroyView, DiseaseListCreateView 
-from app.views import DiseaseRetrieveUpdateDestroyView, SymptomsListCreateView, SymptomsDestroyAll, SymptomsListCreateRandom, AnalaysisListCreate, TestingSetListCreate, ValidationSetListCreate
+from app.views import CreateSymptomsListCreateView, DiseaseRetrieveUpdateDestroyView, SymptomsListCreateView, SymptomsDestroyAll, SymptomsListCreateRandom, AnalaysisListCreate, TestingSetListCreate, ValidationSetListCreate
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -20,6 +20,7 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
+    
     path('getprediction', views.getPrediction, name='getprediction'),
     path('admin', admin.site.urls),
     path('api/analysis/testing/', TestingSetListCreate.as_view(), name='analysis-testing-list-view'),
@@ -27,7 +28,11 @@ urlpatterns = [
     path('api/analysis/', AnalaysisListCreate.as_view(), name='analysis-list-view'),
     path('api/symptoms/create-random/', SymptomsListCreateRandom.as_view(), name='symptoms-random-create'),
     path('api/symptoms/destroy-all/', SymptomsDestroyAll.as_view(), name='symptoms-destroy-all'),
+
+    
+
     path('api/symptoms/', SymptomsListCreateView.as_view(), name='symptoms-list-create'),
+    path('api/create-symptoms/', CreateSymptomsListCreateView.as_view(), name='create-symptoms-list-create'),
     path('api/diseases/', DiseaseListCreateView.as_view(), name='diseases-list-create'),
     path('api/diseases/<int:pk>/', DiseaseRetrieveUpdateDestroyView.as_view(), name='diseases-retrieve-update-destroy'),
     path('api/chickens/', ChickensListCreateView.as_view(), name='chickens-list-create'),

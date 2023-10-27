@@ -44,6 +44,13 @@ class SymptomsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CreateSymptomsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Symptom
+        fields = '__all__'
+
+
 
 class AnalysisSerializer(serializers.ModelSerializer):
 
