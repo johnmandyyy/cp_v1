@@ -182,6 +182,8 @@ class Scripts(Thread):
                     print(each_rows)
                     time.sleep(0.5)
 
+                self.measureValidation()
+
                 print("Is the dependent variables.")
                 print("Training of machine done.")
 
