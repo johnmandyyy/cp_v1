@@ -5,326 +5,335 @@
 
 <div class="row" id="analysis_section" v-for="a in analysis" :key="analysis.id">
 
-  <div class="col-lg-6">
-    <div class="card">
-      <div class="card-body">
-        <h1 class="display-6">Dataset Report</h1>
-        <p class="lead">Total Dataset: [[a.total_dataset]]</p>
-        <p class="lead">Validation Set: [[a.validation_set]]</p>
-        <p class="lead">Training Dataset 80%: [[a.training_dataset]]</p>
-        <p class="lead">Testing Dataset 20%: [[a.testing_dataset]]</p>
-
-      </div>
+    <div class="col-lg-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="display-6">Confusion Matrix</h1>
+                <p class="lead">
+                    Below the images has the precision, accuracy and recall, this is based on the training and validation set.
+                </p>
+                <center>
+                    <img class="img-fluid" src="/media/confusion_matrix_with_metrics.png" style="height: 50%" /></center>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="col-lg-6">
-    <div class="card">
-      <div class="card-body">
-        <h1 classs="display-6">Model Analysis</h1>
-        <p class="lead">How well did the trained model performed?</p>
-        <p class="lead">Accuracy based on validation: [[a.validation_acc]] %</p>
-        <p class="lead">Accuracy based on testing: [[a.testing_acc]] %</p>
-      </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="display-6">Dataset Report</h1>
+                <p class="lead">Total Dataset: [[a.total_dataset]]</p>
+                <p class="lead">Validation Set: [[a.validation_set]]</p>
+                <p class="lead">Training Dataset 80%: [[a.training_dataset]]</p>
+                <p class="lead">Testing Dataset 20%: [[a.testing_dataset]]</p>
+
+            </div>
+        </div>
     </div>
-  </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="display-6">Model Analysis</h1>
+                <p class="lead">How well did the trained model performed?</p>
+                <p class="lead">Accuracy based on validation: [[a.validation_acc]] %</p>
+                <p class="lead">Accuracy based on testing: [[a.testing_acc]] %</p>
+            </div>
+        </div>
+    </div>
 
 </div>
 
 <script>
-  function getCookie(name) {
-    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-    return cookieValue ? cookieValue.pop() : '';
-  }
-  new Vue({
-    delimiters: ["[[", "]]"],
-    el: "#analysis_section",
-    data: {
-      analysis: [],
-    },
-    mounted() {
-      setInterval(this.fetchData, 1000);
-    },
-    methods: {
-      fetchData() {
-        axios.get("/api/analysis/").then(response => {
-          this.analysis = response.data;
-          console.log(this.analysis);
-        }).catch(error => {
-          console.error(error);
-        });
-      }
+    function getCookie(name) {
+        const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return cookieValue ? cookieValue.pop() : '';
     }
-  });
+    new Vue({
+        delimiters: ["[[", "]]"],
+        el: "#analysis_section",
+        data: {
+            analysis: [],
+        },
+        mounted() {
+            setInterval(this.fetchData, 1000);
+        },
+        methods: {
+            fetchData() {
+                axios.get("/api/analysis/").then(response => {
+                    this.analysis = response.data;
+                    console.log(this.analysis);
+                }).catch(error => {
+                    console.error(error);
+                });
+            }
+        }
+    });
 </script>
 
 <br>
 
 <div class="row">
-  <div class="col-lg-12">
-    <div class="card">
-      <div class="card-body">
-        <h1 classs="display-6">Validation Set</h1>
-        <p class="lead">These data are included in the training, but only 10% of
-          the trained data were used.</p>
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h1 classs="display-6">Validation Set</h1>
+                <p class="lead">These data are included in the training, but only 10% of
+                    the trained data were used.</p>
 
-        <div class="table-responsive"
-          style="max-height: 400px; /* Set the maximum height for the scrollable area */
+                <div class="table-responsive" style="max-height: 400px; /* Set the maximum height for the scrollable area */
     overflow-y: auto;">
-          <table class="table table-md table-light table-hover"
-            id="validation_table">
+                    <table class="table table-md table-light table-hover" id="validation_table">
 
-            <thead>
-              <tr>
-                <th>Correct?</th>
-                <th>Disease</th>
-                <th>Warts</th>
-                <th>Loss of Appetite?</th>
-                <th>Lesions</th>
-                <th>Blister</th>
-                <th>Swelling Eyes</th>
-                <th>Weight Loss</th>
-                <th>Reduced Water Consumption</th>
-                <th>Diarrhea</th>
-                <th>Less Egg Production</th>
-                <th>Difficulty Breathing</th>
-                <th>Pale Comb</th>
-                <th>Nasal Discharge</th>
-                <th>Watery Eyes</th>
-                <th>Paralysis</th>
-                <th>Watery Feces</th>
-              </tr>
-            </thead>
+                        <thead>
+                            <tr>
+                                <th>Correct?</th>
+                                <th>Disease</th>
+                                <th>Warts</th>
+                                <th>Loss of Appetite?</th>
+                                <th>Lesions</th>
+                                <th>Blister</th>
+                                <th>Swelling Eyes</th>
+                                <th>Weight Loss</th>
+                                <th>Reduced Water Consumption</th>
+                                <th>Diarrhea</th>
+                                <th>Less Egg Production</th>
+                                <th>Difficulty Breathing</th>
+                                <th>Pale Comb</th>
+                                <th>Nasal Discharge</th>
+                                <th>Watery Eyes</th>
+                                <th>Paralysis</th>
+                                <th>Watery Feces</th>
+                            </tr>
+                        </thead>
 
-            <tbody>
+                        <tbody>
 
-              <tr v-for="symptom in validation" :key="validation.id">
-                <td v-if="symptom.is_correct">Yes</td>
-                <td v-else>No</td>
+                            <tr v-for="symptom in validation" :key="validation.id">
+                                <td v-if="symptom.is_correct">Yes</td>
+                                <td v-else>No</td>
 
-                <td>[[ symptom.disease_name ]]</td>
+                                <td>[[ symptom.disease_name ]]</td>
 
-                <td v-if="symptom.warts">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.loss_of_appetite">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.lesions">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.blister">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.swelling_eyes">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.weight_loss">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.reduced_water_consumption">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.diarrhea">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.less_egg_production">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.difficulty_breathing">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.pale_comb">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.nasal_discharge">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.watery_eyes">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.paralysis">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.watery_feces">Yes</td>
-                <td v-else>No</td>
+                                <td v-if="symptom.warts">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.loss_of_appetite">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.lesions">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.blister">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.swelling_eyes">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.weight_loss">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.reduced_water_consumption">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.diarrhea">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.less_egg_production">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.difficulty_breathing">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.pale_comb">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.nasal_discharge">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.watery_eyes">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.paralysis">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.watery_feces">Yes</td>
+                                <td v-else>No</td>
 
-              </tr>
-            </tbody>
+                            </tr>
+                        </tbody>
 
-          </table>
-        </div>
+                    </table>
+                </div>
 
-        <script>
-                  function getCookie(name) {
-                    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-                    return cookieValue ? cookieValue.pop() : '';
-                  }
-                  new Vue({
-                    delimiters: ["[[", "]]"],
-                    el: "#validation_table",
-                    data: {
-                      validation: [],
-                    },
-                    mounted() {
-                      this.fetchData();
-                      //setInterval(this.fetchData, 1000);
-                    },
-                    methods: {
-                      fetchData() {
-                        axios.get("/api/analysis/validation/").then(response => {
-                          this.validation = response.data;
-
-                          setTimeout(() => {
-                          $('#validation_table').DataTable({
-                              dom: 'Bfrtip', // 'B' indicates the buttons, and 'f' is for the filter/search bar
-                              buttons: [
-                                  'copy', 'csv', 'excel', 'pdf', 'print'
-                              ]
-                          });
-                         }, 3000) //customize this
-
-
-                          console.log(this.validation);
-                        }).catch(error => {
-                          console.error(error);
-                        });
-                      }
+                <script>
+                    function getCookie(name) {
+                        const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                        return cookieValue ? cookieValue.pop() : '';
                     }
-                  });
+                    new Vue({
+                        delimiters: ["[[", "]]"],
+                        el: "#validation_table",
+                        data: {
+                            validation: [],
+                        },
+                        mounted() {
+                            this.fetchData();
+                            //setInterval(this.fetchData, 1000);
+                        },
+                        methods: {
+                            fetchData() {
+                                axios.get("/api/analysis/validation/").then(response => {
+                                    this.validation = response.data;
+
+                                    setTimeout(() => {
+                                        $('#validation_table').DataTable({
+                                            dom: 'Bfrtip', // 'B' indicates the buttons, and 'f' is for the filter/search bar
+                                            buttons: [
+                                                'copy', 'csv', 'excel', 'pdf', 'print'
+                                            ]
+                                        });
+                                    }, 3000) //customize this
+
+
+                                    console.log(this.validation);
+                                }).catch(error => {
+                                    console.error(error);
+                                });
+                            }
+                        }
+                    });
                 </script>
 
-      </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <br>
 <div class="row">
-  <div class="col-lg-12">
-    <div class="card">
-      <div class="card-body">
-        <h1 classs="display-6">Testing Set</h1>
-        <p class="lead">Not included during training, but it came from the given
-          dataset. It will serve as blind testing.</p>
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h1 classs="display-6">Testing Set</h1>
+                <p class="lead">Not included during training, but it came from the given
+                    dataset. It will serve as blind testing.</p>
 
-        <div class="table-responsive"
-          style="max-height: 400px; /* Set the maximum height for the scrollable area */
+                <div class="table-responsive" style="max-height: 400px; /* Set the maximum height for the scrollable area */
     overflow-y: auto;">
-          <table class="table table-md table-light table-hover"
-            id="testing_table">
+                    <table class="table table-md table-light table-hover" id="testing_table">
 
-            <thead>
-              <tr>
-                <th>Correct?</th>
-                <th>Disease</th>
-                <th>Warts</th>
-                <th>Loss of Appetite?</th>
-                <th>Lesions</th>
-                <th>Blister</th>
-                <th>Swelling Eyes</th>
-                <th>Weight Loss</th>
-                <th>Reduced Water Consumption</th>
-                <th>Diarrhea</th>
-                <th>Less Egg Production</th>
-                <th>Difficulty Breathing</th>
-                <th>Pale Comb</th>
-                <th>Nasal Discharge</th>
-                <th>Watery Eyes</th>
-                <th>Paralysis</th>
-                <th>Watery Feces</th>
-              </tr>
-            </thead>
+                        <thead>
+                            <tr>
+                                <th>Correct?</th>
+                                <th>Disease</th>
+                                <th>Warts</th>
+                                <th>Loss of Appetite?</th>
+                                <th>Lesions</th>
+                                <th>Blister</th>
+                                <th>Swelling Eyes</th>
+                                <th>Weight Loss</th>
+                                <th>Reduced Water Consumption</th>
+                                <th>Diarrhea</th>
+                                <th>Less Egg Production</th>
+                                <th>Difficulty Breathing</th>
+                                <th>Pale Comb</th>
+                                <th>Nasal Discharge</th>
+                                <th>Watery Eyes</th>
+                                <th>Paralysis</th>
+                                <th>Watery Feces</th>
+                            </tr>
+                        </thead>
 
-            <tbody>
+                        <tbody>
 
-              <tr v-for="symptom in testing" :key="testing.id">
-                <td v-if="symptom.is_correct">Yes</td>
-                <td v-else>No</td>
+                            <tr v-for="symptom in testing" :key="testing.id">
+                                <td v-if="symptom.is_correct">Yes</td>
+                                <td v-else>No</td>
 
-                <td>[[ symptom.disease_name ]]</td>
+                                <td>[[ symptom.disease_name ]]</td>
 
-                <td v-if="symptom.warts">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.loss_of_appetite">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.lesions">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.blister">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.swelling_eyes">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.weight_loss">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.reduced_water_consumption">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.diarrhea">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.less_egg_production">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.difficulty_breathing">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.pale_comb">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.nasal_discharge">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.watery_eyes">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.paralysis">Yes</td>
-                <td v-else>No</td>
-                <td v-if="symptom.watery_feces">Yes</td>
-                <td v-else>No</td>
+                                <td v-if="symptom.warts">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.loss_of_appetite">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.lesions">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.blister">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.swelling_eyes">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.weight_loss">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.reduced_water_consumption">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.diarrhea">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.less_egg_production">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.difficulty_breathing">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.pale_comb">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.nasal_discharge">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.watery_eyes">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.paralysis">Yes</td>
+                                <td v-else>No</td>
+                                <td v-if="symptom.watery_feces">Yes</td>
+                                <td v-else>No</td>
 
-              </tr>
-            </tbody>
+                            </tr>
+                        </tbody>
 
-          </table>
-        </div>
+                    </table>
+                </div>
 
-        <script>
-                  function getCookie(name) {
-                    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-                    return cookieValue ? cookieValue.pop() : '';
-                  }
-                  new Vue({
-                    delimiters: ["[[", "]]"],
-                    el: "#testing_table",
-                    data: {
-                      testing: [],
-                    },
-                    mounted() {
-                      this.fetchData();
-                      //setInterval(this.fetchData, 10000);
-                    },
-                    methods: {
-                      fetchData() {
-                        axios.get("/api/analysis/testing/").then(response => {
-                          this.testing = response.data;
-                          
-                          setTimeout(() => {
-                          $('#testing_table').DataTable({
-                              dom: 'Bfrtip', // 'B' indicates the buttons, and 'f' is for the filter/search bar
-                              buttons: [
-                                  'copy', 'csv', 'excel', 'pdf', 'print'
-                              ]
-                          });
-                         }, 3000) //customize this
-
-                          console.log(this.testing);
-                        }).catch(error => {
-                          console.error(error);
-                        });
-                      }
+                <script>
+                    function getCookie(name) {
+                        const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                        return cookieValue ? cookieValue.pop() : '';
                     }
-                  });
+                    new Vue({
+                        delimiters: ["[[", "]]"],
+                        el: "#testing_table",
+                        data: {
+                            testing: [],
+                        },
+                        mounted() {
+                            this.fetchData();
+                            //setInterval(this.fetchData, 10000);
+                        },
+                        methods: {
+                            fetchData() {
+                                axios.get("/api/analysis/testing/").then(response => {
+                                    this.testing = response.data;
+
+                                    setTimeout(() => {
+                                        $('#testing_table').DataTable({
+                                            dom: 'Bfrtip', // 'B' indicates the buttons, and 'f' is for the filter/search bar
+                                            buttons: [
+                                                'copy', 'csv', 'excel', 'pdf', 'print'
+                                            ]
+                                        });
+                                    }, 3000) //customize this
+
+                                    console.log(this.testing);
+                                }).catch(error => {
+                                    console.error(error);
+                                });
+                            }
+                        }
+                    });
                 </script>
 
-      </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <br>
 <div class="row">
-  <div class="col-lg-12">
-    <div class="card">
-      <div class="card-body">
-        <h1 classs="display-6">History of Forecast for My Chickens</h1>
-        <p class="lead">Audit trail of forecasted disease for my chickens.</p>
-        <div class="table-responsive">
-          <div class="table">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h1 classs="display-6">History of Forecast for My Chickens</h1>
+                <p class="lead">Audit trail of forecasted disease for my chickens.</p>
+                <div class="table-responsive">
+                    <div class="table">
 
-          </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <address>

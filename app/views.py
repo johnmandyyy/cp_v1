@@ -9,6 +9,7 @@ from django.http import HttpResponse
 
 from .forms import *
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import precision_recall_curve
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import generics
@@ -26,7 +27,12 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 import joblib
-
+from sklearn.metrics import precision_score, accuracy_score, recall_score
+from sklearn.metrics import precision_recall_curve, auc
+from sklearn.preprocessing import label_binarize
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+import joblib
+import matplotlib.pyplot as plt
 
 class DatasetGen:
     def __init__(self):
@@ -138,26 +144,88 @@ class Scripts(Thread):
                 X_train, X_test, y_train, y_test = train_test_split(
                     X, y, test_size=0.2, random_state=2
                 )
-                tree_model = RandomForestRegressor(n_estimators=3)
+                tree_model = RandomForestRegressor(n_estimators=1)
                 print("Fitting into Random Forest Tree")
                 tree_model.fit(X_train, y_train)
                 joblib.dump(tree_model, "random_forest_model.joblib")
                 print("Saving the model.")
+
+                #
+                # Make predictions on the test set
+                y_val_pred = tree_model.predict(X_test)
+
+                # Plot confusion matrix
+                cm = confusion_matrix(y_test, np.round(y_val_pred))
+                plt.figure(figsize=(8, 6))  # Set the size of the plot
+
+                im = plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+                plt.title("Confusion Matrix")
+                plt.colorbar(im, fraction=0.046, pad=0.04)
+
+                for i in range(len(cm)):
+                    for j in range(len(cm[i])):
+                        plt.text(j, i, str(cm[i, j]), ha='center', va='center', color='black')
+
+                # Calculate precision, recall, and accuracy
+                precision = precision_score(y_test, np.round(y_val_pred), average='weighted')
+                recall = recall_score(y_test, np.round(y_val_pred), average='weighted')
+                accuracy = accuracy_score(y_test, np.round(y_val_pred))
+
+                # Display precision, recall, and accuracy below the plot
+                plt.text(0.5, -0.1, f"Precision: {precision:.4f}\nRecall: {recall:.4f}\nAccuracy: {accuracy:.4f}",
+                         ha='center', va='center', transform=plt.gca().transAxes)
+
+                plt.savefig("media/confusion_matrix_with_metrics.png")
+
                 print("\n\n")
                 for each_rows in X.columns:
                     print(each_rows)
                     time.sleep(0.5)
 
                 print("Is the dependent variables.")
-                print("Creating a Validation Set from 10% of the Trained Data")
-                self.measureValidation()
-
-                time.sleep(5)
-
                 print("Training of machine done.")
 
         else:
             print("Insufficient Dataset")
+
+
+    def saveImage(self, y_test, y_pred):
+        # Convert to binary classification
+        threshold = 0.5  # Adjust the threshold as needed
+        y_pred_binary = (y_pred > threshold).astype(int)
+
+        # Binarize the true labels
+        unique_classes = np.unique(y_test)
+        y_test_binary = label_binarize(y_test, classes=unique_classes)
+
+        # Ensure the lengths match
+        if len(y_test_binary) != len(y_pred_binary):
+            print("Error: Lengths of y_test_binary and y_pred_binary do not match.")
+            return
+
+        # Evaluate the model
+        precision, recall, _ = precision_recall_curve(y_test_binary.ravel(), y_pred_binary.ravel())
+        auc_score = auc(recall, precision)
+
+        print(f"AUC (Area Under Curve): {auc_score}")
+
+        # Save precision-recall curve as PNG
+        plt.figure(figsize=(8, 6))
+        plt.plot(recall, precision, color='darkorange', lw=2)
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.title('Precision-Recall Curve')
+        plt.savefig('precision_recall_curve.png')
+        plt.close()
+
+        # Plot the actual vs. predicted values
+        plt.figure(figsize=(8, 6))
+        plt.scatter(y_test_binary, y_pred_binary, color='blue')
+        plt.xlabel('Actual (Binary)')
+        plt.ylabel('Predicted (Binary)')
+        plt.title('Actual vs. Predicted Values (Binary)')
+        plt.savefig('actual_vs_predicted_binary.png')
+        plt.close()
 
     def measureValidation(self):
         Predictor = DatasetGen()
